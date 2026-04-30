@@ -477,7 +477,7 @@ async function fetchAll() {
   try {
     const [trades, statuses] = await Promise.all([
       sbFetch('trades?order=created_at.desc&limit=200'),
-      sbFetch('ea_status?order=created_at.desc&limit=50')
+      sbFetch('ea_status?order=updated_at.desc&limit=50')
     ]);
     allTrades = trades;
     setOnline(true);
@@ -501,10 +501,10 @@ function setOnline(ok) {
 
 // ─── STATS ────────────────────────────────────────────────
 function renderStats(trades) {
-  const closed = trades.filter(t => t.status !== 'OPEN');
-  const wins   = closed.filter(t => t.status === 'WIN');
-  const losses = closed.filter(t => t.status === 'LOSS');
-  const opens  = trades.filter(t => t.status === 'OPEN');
+  const closed = trades.filter(t => t.result !== 'OPEN');
+  const wins   = closed.filter(t => t.result === 'WIN');
+  const losses = closed.filter(t => t.result === 'LOSS');
+  const opens  = trades.filter(t => t.result === 'OPEN');
   const wr     = closed.length ? (wins.length / closed.length * 100).toFixed(1) : 0;
   const net    = closed.reduce((s, t) => s + (t.profit || 0), 0);
   const avg    = closed.length ? (net / closed.length).toFixed(2) : 0;
@@ -515,8 +515,8 @@ function renderStats(trades) {
   // Max loss streak
   let streak = 0, maxStreak = 0;
   [...trades].reverse().forEach(t => {
-    if (t.status === 'LOSS') { streak++; maxStreak = Math.max(maxStreak, streak); }
-    else if (t.status === 'WIN') streak = 0;
+    if (t.result === 'LOSS') { streak++; maxStreak = Math.max(maxStreak, streak); }
+    else if (t.result === 'WIN') streak = 0;
   });
 
   document.getElementById('s-total').textContent = trades.length;
@@ -541,7 +541,7 @@ function setFilter(f, btn) {
 }
 
 function renderTable(trades) {
-  const filtered = currentFilter === 'ALL' ? trades : trades.filter(t => t.status === currentFilter);
+  const filtered = currentFilter === 'ALL' ? trades : trades.filter(t => t.result === currentFilter);
   const tbody = document.getElementById('tradeBody');
   if (!filtered.length) {
     tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📭</div>ไม่มีข้อมูล</div></td></tr>`;
@@ -551,16 +551,16 @@ function renderTable(trades) {
     const pClass = (t.profit || 0) >= 0 ? 'profit-pos' : 'profit-neg';
     const pSign  = (t.profit || 0) >= 0 ? '+' : '';
     const dirBadge = `<span class="badge badge-${(t.direction||'').toLowerCase()}">${t.direction||'—'}</span>`;
-    const stBadge  = `<span class="badge badge-${(t.status||'open').toLowerCase()}">${t.status||'—'}</span>`;
-    const timeStr  = t.server_time ? t.server_time.replace('T',' ') : (t.created_at || '').substring(0,19);
+    const stBadge  = `<span class="badge badge-${(t.result||'open').toLowerCase()}">${t.result||'—'}</span>`;
+    const timeStr  = t.open_time ? t.open_time.replace('T',' ') : (t.created_at || '').substring(0,19);
     return `<tr>
       <td class="muted-val" style="font-size:11px">${timeStr}</td>
       <td>${dirBadge}</td>
-      <td>${fmt(t.open_price)}</td>
-      <td class="muted-val">${fmt(t.sl)}</td>
-      <td class="muted-val">${fmt(t.tp)}</td>
-      <td class="muted-val">${(t.lot||0).toFixed(2)}</td>
-      <td class="${pClass}">${t.status === 'OPEN' ? '—' : pSign + (t.profit||0).toFixed(2)}</td>
+      <td>${fmt(t.entry_price)}</td>
+      <td class="muted-val">${fmt(t.sl_price)}</td>
+      <td class="muted-val">${fmt(t.tp_price)}</td>
+      <td class="muted-val">${(t.lot_size||0).toFixed(2)}</td>
+      <td class="${pClass}">${t.result === 'OPEN' ? '—' : pSign + (t.profit||0).toFixed(2)}</td>
       <td>${stBadge}</td>
     </tr>`;
   }).join('');
@@ -645,12 +645,13 @@ function renderStatusLog(statuses) {
     return;
   }
   wrap.innerHTML = statuses.map(s => {
-    const cls = s.status_msg?.includes('BREAKER') ? 'err'
-              : s.status_msg?.includes('WIN')      ? 'ok'
-              : 'warn';
+    const cls = s.status?.includes('STOPPED') ? 'err'
+              : s.status?.includes('IN_TRADE') ? 'warn'
+              : 'ok';
+    const time = (s.updated_at || '').substring(0,19).replace('T',' ');
     return `<div class="log-entry">
-      <span class="log-time">${(s.logged_at || '').substring(0,19)}</span>
-      <span class="log-msg ${cls}">${s.status_msg} — BAL: ${(s.balance||0).toFixed(2)} EQ: ${(s.equity||0).toFixed(2)} STREAK: ${s.consec_loss}</span>
+      <span class="log-time">${time}</span>
+      <span class="log-msg ${cls}">${s.status} — BAL: ${(s.balance||0).toFixed(2)} EQ: ${(s.equity||0).toFixed(2)} STREAK: ${s.consec_loss}</span>
     </div>`;
   }).join('');
 }
