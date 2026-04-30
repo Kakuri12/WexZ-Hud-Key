@@ -469,15 +469,18 @@ async function sbFetch(endpoint) {
   const res = await fetch(`${SB_URL}/rest/v1/${endpoint}`, {
     headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` }
   });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  if (!res.ok) {
+    const body = await res.text().catch(() => '(no body)');
+    throw new Error(`HTTP ${res.status} [${endpoint.split('?')[0]}] → ${body}`);
+  }
   return res.json();
 }
 
 async function fetchAll() {
   try {
     const [trades, statuses] = await Promise.all([
-      sbFetch('trades?order=created_at.desc&limit=200'),
-      sbFetch('ea_status?order=updated_at.desc&limit=50')
+      sbFetch('trades?select=*&order=created_at.desc&limit=200'),
+      sbFetch('ea_status?select=*&order=updated_at.desc&limit=50')
     ]);
     allTrades = trades;
     setOnline(true);
@@ -490,7 +493,7 @@ async function fetchAll() {
   } catch(e) {
     setOnline(false);
     console.error(e);
-    addLogEntry('ERROR: ' + e.message, 'err');
+    addLogEntry('❌ ' + e.message, 'err');
   }
 }
 
