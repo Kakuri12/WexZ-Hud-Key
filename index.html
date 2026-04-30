@@ -8,18 +8,24 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:       #08090d;
-    --surface:  #0f1117;
-    --border:   #1e2130;
-    --text:     #c8cdd8;
-    --muted:    #4a5068;
-    --accent:   #00e5a0;
-    --red:      #ff4560;
-    --gold:     #f5c542;
-    --blue:     #3d8aff;
-    --win:      #00e5a0;
-    --loss:     #ff4560;
-    --open:     #3d8aff;
+    /* Monochrome Palette */
+    --bg:       #000000;
+    --surface:  #0a0a0a;
+    --surface-alt:#111111;
+    --border:   #2a2a2a;
+    --border-hover: #4a4a4a;
+    --text:     #ffffff;
+    --muted:    #777777;
+    --dimmed:   #444444;
+    
+    /* Semantic B&W */
+    --accent:   #ffffff;
+    --accent-inv: #000000;
+    --win:      #ffffff;
+    --loss:     #666666;
+    --open:     #aaaaaa;
+    
+    /* Typography */
     --mono:     'Space Mono', monospace;
     --sans:     'Syne', sans-serif;
   }
@@ -32,22 +38,22 @@
     font-family: var(--mono);
     min-height: 100vh;
     overflow-x: hidden;
+    line-height: 1.5;
   }
 
-  /* ─── GRID NOISE OVERLAY ─── */
+  /* ─── DOT NOISE OVERLAY ─── */
   body::before {
     content: '';
     position: fixed; inset: 0;
-    background-image:
-      linear-gradient(rgba(0,229,160,.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,229,160,.03) 1px, transparent 1px);
-    background-size: 40px 40px;
+    background-image: radial-gradient(var(--border) 1px, transparent 1px);
+    background-size: 24px 24px;
     pointer-events: none;
     z-index: 0;
+    opacity: 0.4;
   }
 
   /* ─── LAYOUT ─── */
-  .shell { position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; padding: 24px 20px; }
+  .shell { position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; padding: 32px 20px; }
 
   /* ─── HEADER ─── */
   header {
@@ -56,135 +62,143 @@
     border-bottom: 1px solid var(--border);
     margin-bottom: 32px;
   }
-  .logo { display: flex; align-items: baseline; gap: 10px; }
+  .logo { display: flex; align-items: baseline; gap: 12px; }
   .logo-title {
-    font-family: var(--sans); font-weight: 800; font-size: 22px;
-    color: #fff; letter-spacing: -0.5px;
+    font-family: var(--sans); font-weight: 800; font-size: 24px;
+    color: var(--text); letter-spacing: -0.5px;
+    text-transform: uppercase;
   }
   .logo-badge {
-    font-size: 11px; font-family: var(--mono); letter-spacing: 2px;
-    color: var(--accent); border: 1px solid var(--accent);
-    padding: 2px 8px; border-radius: 2px;
+    font-size: 10px; font-family: var(--mono); letter-spacing: 2px;
+    color: var(--bg); background: var(--text);
+    padding: 3px 8px; border-radius: 2px; font-weight: 700;
   }
   .header-right { display: flex; align-items: center; gap: 16px; }
+  .live-indicator {
+    display: flex; align-items: center; gap: 8px;
+    border: 1px solid var(--border);
+    padding: 6px 12px; border-radius: 20px;
+    background: var(--surface);
+  }
   .live-dot {
-    width: 8px; height: 8px; border-radius: 50%;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--muted);
+  }
+  .live-dot.active {
     background: var(--accent);
     animation: pulse 2s ease-in-out infinite;
   }
   @keyframes pulse {
-    0%,100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0,229,160,.6); }
-    50% { opacity: .7; box-shadow: 0 0 0 6px rgba(0,229,160,0); }
+    0%,100% { opacity: 1; box-shadow: 0 0 0 0 rgba(255,255,255,.4); }
+    50% { opacity: .5; box-shadow: 0 0 0 4px rgba(255,255,255,0); }
   }
-  .live-text { font-size: 11px; letter-spacing: 2px; color: var(--accent); }
+  .live-text { font-size: 10px; letter-spacing: 2px; color: var(--text); font-weight: 700; }
   .last-update { font-size: 11px; color: var(--muted); }
 
   /* ─── CONFIG BAR ─── */
   .config-bar {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 16px 20px;
-    display: flex; gap: 12px; align-items: flex-end;
-    margin-bottom: 28px;
+    border-radius: 4px;
+    padding: 20px;
+    display: flex; gap: 16px; align-items: flex-end;
+    margin-bottom: 32px;
     flex-wrap: wrap;
   }
-  .config-group { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 200px; }
-  .config-label { font-size: 10px; letter-spacing: 2px; color: var(--muted); }
+  .config-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 220px; }
+  .config-label { font-size: 10px; letter-spacing: 2px; color: var(--muted); font-weight: 700; }
   .config-input {
     background: var(--bg);
     border: 1px solid var(--border);
     color: var(--text);
     font-family: var(--mono);
     font-size: 12px;
-    padding: 8px 12px;
-    border-radius: 4px;
+    padding: 10px 12px;
+    border-radius: 2px;
     outline: none;
-    transition: border-color .2s;
+    transition: all .2s;
     width: 100%;
   }
-  .config-input:focus { border-color: var(--accent); }
+  .config-input:focus { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
   .connect-btn {
-    background: var(--accent); color: #000;
+    background: var(--accent); color: var(--accent-inv);
     font-family: var(--mono); font-weight: 700;
     font-size: 12px; letter-spacing: 1px;
-    border: none; padding: 9px 20px;
-    border-radius: 4px; cursor: pointer;
-    transition: opacity .2s, transform .1s;
+    border: 1px solid var(--accent); padding: 10px 24px;
+    border-radius: 2px; cursor: pointer;
+    transition: all .2s;
     white-space: nowrap;
     align-self: flex-end;
   }
-  .connect-btn:hover { opacity: .85; transform: translateY(-1px); }
-  .connect-btn:active { transform: translateY(0); }
+  .connect-btn:hover { background: transparent; color: var(--accent); }
+  .connect-btn:active { transform: translateY(1px); }
 
   /* ─── SQL SETUP ─── */
   .sql-box {
-    background: #0d0f15;
+    background: var(--surface-alt);
     border: 1px solid var(--border);
-    border-left: 3px solid var(--gold);
-    border-radius: 6px;
+    border-left: 4px solid var(--muted);
+    border-radius: 4px;
     padding: 16px 20px;
-    margin-bottom: 28px;
+    margin-bottom: 32px;
     font-size: 11px;
   }
-  .sql-title { color: var(--gold); font-weight: 700; letter-spacing: 2px; margin-bottom: 10px; font-size: 10px; }
-  .sql-code { color: #7ec8a4; line-height: 1.8; white-space: pre-wrap; font-size: 11px; }
-  .sql-code .kw { color: #c792ea; }
-  .sql-code .ty { color: #82aaff; }
-  .sql-code .cm { color: var(--muted); }
-  .sql-toggle { color: var(--gold); cursor: pointer; font-size: 10px; letter-spacing: 1px; }
-  .sql-toggle:hover { text-decoration: underline; }
+  .sql-title { color: var(--text); font-weight: 700; letter-spacing: 2px; margin-bottom: 12px; font-size: 11px; }
+  .sql-code { color: #cccccc; line-height: 1.8; white-space: pre-wrap; font-size: 11px; }
+  .sql-code .kw { color: #ffffff; font-weight: 700; }
+  .sql-code .ty { color: #aaaaaa; }
+  .sql-code .cm { color: var(--dimmed); font-style: italic; }
+  .sql-toggle { color: var(--muted); cursor: pointer; font-size: 10px; letter-spacing: 1px; transition: color 0.2s; }
+  .sql-toggle:hover { color: var(--text); }
 
   /* ─── STAT CARDS ─── */
-  .stats-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-bottom: 28px; }
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; margin-bottom: 32px; }
   .stat-card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 16px;
-    position: relative; overflow: hidden;
-    transition: border-color .2s;
+    border-radius: 4px;
+    padding: 20px;
+    position: relative;
+    transition: all .2s;
   }
-  .stat-card:hover { border-color: var(--muted); }
-  .stat-card::after {
-    content: '';
-    position: absolute; top: 0; left: 0; right: 0; height: 2px;
-    background: var(--accent-color, var(--accent));
-  }
-  .stat-label { font-size: 10px; letter-spacing: 2px; color: var(--muted); margin-bottom: 8px; }
-  .stat-value { font-family: var(--sans); font-weight: 800; font-size: 26px; color: #fff; }
-  .stat-sub { font-size: 10px; color: var(--muted); margin-top: 4px; }
+  .stat-card:hover { border-color: var(--border-hover); background: var(--surface-alt); transform: translateY(-2px); }
+  .stat-label { font-size: 10px; letter-spacing: 2px; color: var(--muted); margin-bottom: 12px; font-weight: 700;}
+  .stat-value { font-family: var(--sans); font-weight: 800; font-size: 28px; color: var(--text); letter-spacing: -1px; }
+  .stat-sub { font-size: 10px; color: var(--muted); margin-top: 6px; letter-spacing: 1px;}
 
   /* ─── TABLE ─── */
   .section-header {
     display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
   }
-  .section-title { font-family: var(--sans); font-weight: 700; font-size: 14px; color: #fff; letter-spacing: 1px; }
-  .filter-tabs { display: flex; gap: 4px; }
+  .section-title { font-family: var(--sans); font-weight: 800; font-size: 16px; color: var(--text); letter-spacing: 1px; text-transform: uppercase;}
+  .filter-tabs { display: flex; gap: 6px; }
   .filter-tab {
     font-family: var(--mono); font-size: 10px; letter-spacing: 1px;
-    padding: 4px 12px; border-radius: 3px;
+    padding: 6px 14px; border-radius: 2px;
     border: 1px solid var(--border);
-    color: var(--muted); background: transparent; cursor: pointer;
-    transition: all .15s;
+    color: var(--muted); background: var(--bg); cursor: pointer;
+    transition: all .2s;
+    font-weight: 700;
   }
-  .filter-tab.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 700; }
+  .filter-tab.active { background: var(--text); color: var(--bg); border-color: var(--text); }
   .filter-tab:hover:not(.active) { border-color: var(--muted); color: var(--text); }
 
   .table-wrap {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: 4px;
     overflow: hidden;
-    margin-bottom: 28px;
+    margin-bottom: 32px;
   }
   table { width: 100%; border-collapse: collapse; }
   thead th {
-    background: #0d0f15;
+    background: var(--surface-alt);
     text-align: left; font-size: 10px; letter-spacing: 2px;
-    color: var(--muted); font-weight: 400;
-    padding: 10px 16px;
+    color: var(--muted); font-weight: 700;
+    padding: 12px 16px;
     border-bottom: 1px solid var(--border);
   }
   tbody tr {
@@ -192,75 +206,77 @@
     transition: background .15s;
   }
   tbody tr:last-child { border-bottom: none; }
-  tbody tr:hover { background: rgba(255,255,255,.025); }
-  tbody td { padding: 11px 16px; font-size: 12px; }
+  tbody tr:hover { background: var(--surface-alt); }
+  tbody td { padding: 12px 16px; font-size: 12px; }
 
+  /* B&W Badges */
   .badge {
-    display: inline-flex; align-items: center; gap: 5px;
+    display: inline-flex; align-items: center; justify-content: center;
     font-size: 10px; font-weight: 700; letter-spacing: 1px;
-    padding: 3px 10px; border-radius: 3px;
+    padding: 4px 10px; border-radius: 2px; min-width: 50px;
+    text-transform: uppercase;
   }
-  .badge-win  { background: rgba(0,229,160,.12); color: var(--win); }
-  .badge-loss { background: rgba(255,69,96,.12);  color: var(--loss); }
-  .badge-open { background: rgba(61,138,255,.12); color: var(--open); }
-  .badge-buy  { background: rgba(0,229,160,.08);  color: var(--win); border: 1px solid rgba(0,229,160,.2); }
-  .badge-sell { background: rgba(255,69,96,.08);  color: var(--loss); border: 1px solid rgba(255,69,96,.2); }
+  .badge-win  { background: var(--text); color: var(--bg); }
+  .badge-loss { background: transparent; color: var(--loss); border: 1px solid var(--loss); }
+  .badge-open { background: transparent; color: var(--open); border: 1px dashed var(--open); }
+  .badge-buy  { background: transparent; color: var(--text); border: 1px solid var(--text); }
+  .badge-sell { background: var(--surface-alt); color: var(--muted); border: 1px solid var(--muted); }
 
-  .profit-pos { color: var(--win); }
+  /* B&W Profit Indicators */
+  .profit-pos { color: var(--win); font-weight: 700; }
   .profit-neg { color: var(--loss); }
   .muted-val  { color: var(--muted); }
 
   /* ─── EMPTY / LOADING ─── */
   .empty-state {
     text-align: center; padding: 60px 20px;
-    color: var(--muted); font-size: 13px; line-height: 2;
+    color: var(--muted); font-size: 12px; letter-spacing: 1px;
   }
-  .empty-icon { font-size: 32px; margin-bottom: 12px; opacity: .4; }
-  .spinner {
-    width: 20px; height: 20px;
-    border: 2px solid var(--border);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin .7s linear infinite;
-    margin: 0 auto 12px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
+  .empty-icon { font-size: 24px; margin-bottom: 16px; color: var(--dimmed); }
+  
   /* ─── EQUITY CHART ─── */
   .chart-wrap {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 28px;
+    border-radius: 4px;
+    padding: 24px;
+    margin-bottom: 32px;
   }
-  .chart-title { font-size: 12px; letter-spacing: 2px; color: var(--muted); margin-bottom: 16px; }
+  .chart-title { font-size: 11px; font-weight: 700; letter-spacing: 2px; color: var(--text); margin-bottom: 20px; display: flex; align-items: center; gap: 8px;}
+  .chart-title::before { content: ''; display: block; width: 8px; height: 8px; background: var(--text); }
   canvas { width: 100% !important; display: block; }
 
   /* ─── STATUS LOG ─── */
   .log-wrap {
-    background: var(--surface);
+    background: var(--bg);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: 4px;
     padding: 16px 20px;
-    max-height: 220px;
+    max-height: 240px;
     overflow-y: auto;
+    font-family: var(--mono);
   }
-  .log-wrap::-webkit-scrollbar { width: 4px; }
-  .log-wrap::-webkit-scrollbar-track { background: transparent; }
-  .log-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-  .log-entry { font-size: 11px; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,.03); display: flex; gap: 12px; }
-  .log-time { color: var(--muted); min-width: 160px; }
+  .log-wrap::-webkit-scrollbar { width: 6px; }
+  .log-wrap::-webkit-scrollbar-track { background: var(--bg); }
+  .log-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  .log-wrap::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+  .log-entry { font-size: 11px; padding: 8px 0; border-bottom: 1px solid var(--border); display: flex; gap: 16px; }
+  .log-entry:last-child { border-bottom: none; }
+  .log-time { color: var(--muted); min-width: 150px; }
   .log-msg  { color: var(--text); }
-  .log-msg.ok   { color: var(--accent); }
-  .log-msg.warn { color: var(--gold); }
-  .log-msg.err  { color: var(--loss); }
+  
+  /* B&W Status levels */
+  .log-msg.ok   { color: var(--text); }
+  .log-msg.warn { color: var(--open); font-style: italic; }
+  .log-msg.err  { color: var(--loss); text-decoration: line-through; }
 
   /* ─── RESPONSIVE ─── */
-  @media(max-width:600px) {
-    .config-bar { flex-direction: column; }
+  @media(max-width:768px) {
+    .config-bar { flex-direction: column; align-items: stretch; }
+    .connect-btn { align-self: stretch; }
     .stats-row { grid-template-columns: repeat(2, 1fr); }
     thead th:nth-child(n+5), tbody td:nth-child(n+5) { display: none; }
+    .shell { padding: 16px; }
   }
 </style>
 </head>
@@ -271,12 +287,14 @@
   <header>
     <div class="logo">
       <span class="logo-title">ProBreakout EA</span>
-      <span class="logo-badge">XAUUSD · v2.10</span>
+      <span class="logo-badge">XAUUSD</span>
     </div>
     <div class="header-right">
-      <div class="live-dot" id="liveDot" style="background:var(--muted)"></div>
-      <span class="live-text" id="liveText">OFFLINE</span>
       <span class="last-update" id="lastUpdate">—</span>
+      <div class="live-indicator">
+        <div class="live-dot" id="liveDot"></div>
+        <span class="live-text" id="liveText">OFFLINE</span>
+      </div>
     </div>
   </header>
 
@@ -290,22 +308,22 @@
       <label class="config-label">ANON KEY</label>
       <input class="config-input" id="cfgKey" type="password" placeholder="eyJhbGciOiJ..." spellcheck="false"/>
     </div>
-    <div class="config-group" style="max-width:120px">
-      <label class="config-label">AUTO REFRESH</label>
+    <div class="config-group" style="max-width:140px; min-width: 100px;">
+      <label class="config-label">REFRESH</label>
       <select class="config-input" id="cfgInterval">
-        <option value="5000">5s</option>
-        <option value="10000" selected>10s</option>
-        <option value="30000">30s</option>
-        <option value="0">Off</option>
+        <option value="5000">5 SEC</option>
+        <option value="10000" selected>10 SEC</option>
+        <option value="30000">30 SEC</option>
+        <option value="0">OFF</option>
       </select>
     </div>
-    <button class="connect-btn" onclick="connect()">▶ CONNECT</button>
+    <button class="connect-btn" onclick="connect()">CONNECT DB</button>
   </div>
 
   <!-- SQL SETUP -->
   <div class="sql-box">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <div class="sql-title">⚙ SUPABASE SQL SETUP (รันครั้งแรกครั้งเดียว)</div>
+    <div style="display:flex;justify-content:space-between;align-items:center; margin-bottom: 8px;">
+      <div class="sql-title">SUPABASE SQL SCHEMA (FIRST TIME SETUP)</div>
       <span class="sql-toggle" onclick="toggleSql()">[ SHOW / HIDE ]</span>
     </div>
     <pre id="sqlBlock" style="display:none" class="sql-code"><span class="cm">-- Table 1: บันทึก Trade ทุกรายการ</span>
@@ -348,35 +366,35 @@
 
   <!-- STAT CARDS -->
   <div class="stats-row" id="statsRow">
-    <div class="stat-card" style="--accent-color:var(--blue)">
+    <div class="stat-card">
       <div class="stat-label">TOTAL TRADES</div>
       <div class="stat-value" id="s-total">—</div>
-      <div class="stat-sub" id="s-open">— open</div>
+      <div class="stat-sub" id="s-open">— OPEN</div>
     </div>
-    <div class="stat-card" style="--accent-color:var(--win)">
+    <div class="stat-card">
       <div class="stat-label">WIN RATE</div>
       <div class="stat-value" id="s-wr">—</div>
       <div class="stat-sub" id="s-wl">— W / — L</div>
     </div>
-    <div class="stat-card" style="--accent-color:var(--gold)">
+    <div class="stat-card">
       <div class="stat-label">NET PROFIT</div>
       <div class="stat-value" id="s-pnl">—</div>
-      <div class="stat-sub" id="s-avg">avg per trade</div>
+      <div class="stat-sub" id="s-avg">AVG PER TRADE</div>
     </div>
-    <div class="stat-card" style="--accent-color:var(--loss)">
+    <div class="stat-card">
       <div class="stat-label">MAX LOSS STREAK</div>
       <div class="stat-value" id="s-streak">—</div>
-      <div class="stat-sub">consecutive</div>
+      <div class="stat-sub">CONSECUTIVE</div>
     </div>
-    <div class="stat-card" style="--accent-color:var(--accent)">
+    <div class="stat-card">
       <div class="stat-label">BEST TRADE</div>
       <div class="stat-value profit-pos" id="s-best">—</div>
-      <div class="stat-sub">single trade</div>
+      <div class="stat-sub">SINGLE TRADE</div>
     </div>
-    <div class="stat-card" style="--accent-color:var(--loss)">
+    <div class="stat-card">
       <div class="stat-label">WORST TRADE</div>
       <div class="stat-value profit-neg" id="s-worst">—</div>
-      <div class="stat-sub">single trade</div>
+      <div class="stat-sub">SINGLE TRADE</div>
     </div>
   </div>
 
@@ -411,19 +429,19 @@
         </tr>
       </thead>
       <tbody id="tradeBody">
-        <tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📡</div>กรอก Supabase URL และ Key แล้วกด CONNECT</div></td></tr>
+        <tr><td colspan="8"><div class="empty-state"><div class="empty-icon">DATABASE DISCONNECTED</div>กรอก Supabase URL และ Key แล้วกด CONNECT DB</div></td></tr>
       </tbody>
     </table>
   </div>
 
   <!-- EA STATUS LOG -->
   <div class="section-header">
-    <div class="section-title">EA STATUS LOG</div>
+    <div class="section-title">SYSTEM LOG</div>
   </div>
   <div class="log-wrap" id="statusLog">
     <div class="log-entry">
       <span class="log-time">—</span>
-      <span class="log-msg">รอการเชื่อมต่อ...</span>
+      <span class="log-msg muted-val">รอการเชื่อมต่อฐานข้อมูล...</span>
     </div>
   </div>
 
@@ -489,17 +507,22 @@ async function fetchAll() {
     renderEquityCurve(trades);
     renderStatusLog(statuses);
     document.getElementById('lastUpdate').textContent =
-      'updated ' + new Date().toLocaleTimeString('th-TH');
+      'LAST SYNC: ' + new Date().toLocaleTimeString('th-TH');
   } catch(e) {
     setOnline(false);
     console.error(e);
-    addLogEntry('❌ ' + e.message, 'err');
+    addLogEntry('[SYS ERROR] ' + e.message, 'err');
   }
 }
 
 function setOnline(ok) {
-  document.getElementById('liveDot').style.background = ok ? 'var(--accent)' : 'var(--muted)';
-  document.getElementById('liveText').textContent = ok ? 'LIVE' : 'ERROR';
+  const dot = document.getElementById('liveDot');
+  if (ok) {
+      dot.classList.add('active');
+  } else {
+      dot.classList.remove('active');
+  }
+  document.getElementById('liveText').textContent = ok ? 'SYSTEM LIVE' : 'OFFLINE';
 }
 
 // ─── STATS ────────────────────────────────────────────────
@@ -523,13 +546,13 @@ function renderStats(trades) {
   });
 
   document.getElementById('s-total').textContent = trades.length;
-  document.getElementById('s-open').textContent  = opens.length + ' open';
+  document.getElementById('s-open').textContent  = opens.length + ' OPEN';
   document.getElementById('s-wr').textContent    = wr + '%';
   document.getElementById('s-wl').textContent    = `${wins.length} W / ${losses.length} L`;
   const pnlEl = document.getElementById('s-pnl');
   pnlEl.textContent = (net >= 0 ? '+' : '') + net.toFixed(2);
   pnlEl.className   = 'stat-value ' + (net >= 0 ? 'profit-pos' : 'profit-neg');
-  document.getElementById('s-avg').textContent   = (avg >= 0 ? '+' : '') + avg + ' avg';
+  document.getElementById('s-avg').textContent   = (avg >= 0 ? '+' : '') + avg + ' AVG';
   document.getElementById('s-streak').textContent= maxStreak;
   document.getElementById('s-best').textContent  = '+' + best.toFixed(2);
   document.getElementById('s-worst').textContent = worst.toFixed(2);
@@ -547,7 +570,7 @@ function renderTable(trades) {
   const filtered = currentFilter === 'ALL' ? trades : trades.filter(t => t.result === currentFilter);
   const tbody = document.getElementById('tradeBody');
   if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📭</div>ไม่มีข้อมูล</div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">NO RECORDS FOUND FOR THIS FILTER</div></td></tr>`;
     return;
   }
   tbody.innerHTML = filtered.map(t => {
@@ -571,7 +594,7 @@ function renderTable(trades) {
 
 function fmt(v) { return v ? Number(v).toFixed(2) : '—'; }
 
-// ─── EQUITY CURVE ─────────────────────────────────────────
+// ─── EQUITY CURVE (B&W Theme) ─────────────────────────────
 function initChart() {
   const canvas = document.getElementById('equityChart');
   const ctx = canvas.getContext('2d');
@@ -597,9 +620,9 @@ function drawChart(points) {
   ctx.clearRect(0, 0, W, H);
 
   if (points.length < 2) {
-    ctx.fillStyle = '#1e2130';
+    ctx.fillStyle = '#444444';
     ctx.font = '11px Space Mono, monospace';
-    ctx.fillText('ยังไม่มีข้อมูล Trade ที่ปิดแล้ว', W/2 - 100, H/2);
+    ctx.fillText('WAITING FOR CLOSED TRADES...', W/2 - 100, H/2);
     return;
   }
 
@@ -608,11 +631,10 @@ function drawChart(points) {
   const toX  = i => pad + (i / (points.length - 1)) * (W - pad * 2);
   const toY  = v => pad + (1 - (v - min) / range) * (H - pad * 2);
 
-  // Area fill
+  // Area fill (Monochrome Gradient)
   const grad = ctx.createLinearGradient(0, 0, 0, H);
-  const isPos = points[points.length-1] >= 0;
-  grad.addColorStop(0, isPos ? 'rgba(0,229,160,.25)' : 'rgba(255,69,96,.25)');
-  grad.addColorStop(1, 'rgba(0,0,0,0)');
+  grad.addColorStop(0, 'rgba(255, 255, 255, 0.15)');
+  grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
 
   ctx.beginPath();
   ctx.moveTo(toX(0), toY(points[0]));
@@ -623,19 +645,19 @@ function drawChart(points) {
   ctx.fillStyle = grad;
   ctx.fill();
 
-  // Line
+  // Line (Solid White)
   ctx.beginPath();
   ctx.moveTo(toX(0), toY(points[0]));
   points.forEach((v, i) => ctx.lineTo(toX(i), toY(v)));
-  ctx.strokeStyle = isPos ? '#00e5a0' : '#ff4560';
-  ctx.lineWidth = 2;
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 1.5;
   ctx.stroke();
 
-  // Zero line
+  // Zero line (Dashed Gray)
   if (min < 0 && max > 0) {
     ctx.beginPath();
     ctx.moveTo(pad, toY(0)); ctx.lineTo(W - pad, toY(0));
-    ctx.strokeStyle = '#1e2130'; ctx.lineWidth = 1;
+    ctx.strokeStyle = '#444444'; ctx.lineWidth = 1;
     ctx.setLineDash([4,4]); ctx.stroke(); ctx.setLineDash([]);
   }
 }
@@ -644,7 +666,7 @@ function drawChart(points) {
 function renderStatusLog(statuses) {
   const wrap = document.getElementById('statusLog');
   if (!statuses.length) {
-    wrap.innerHTML = '<div class="log-entry"><span class="log-time">—</span><span class="log-msg muted-val">ยังไม่มีข้อมูล EA Status</span></div>';
+    wrap.innerHTML = '<div class="log-entry"><span class="log-time">—</span><span class="log-msg muted-val">NO LOG ENTRIES</span></div>';
     return;
   }
   wrap.innerHTML = statuses.map(s => {
@@ -653,8 +675,8 @@ function renderStatusLog(statuses) {
               : 'ok';
     const time = (s.updated_at || '').substring(0,19).replace('T',' ');
     return `<div class="log-entry">
-      <span class="log-time">${time}</span>
-      <span class="log-msg ${cls}">${s.status} — BAL: ${(s.balance||0).toFixed(2)} EQ: ${(s.equity||0).toFixed(2)} STREAK: ${s.consec_loss}</span>
+      <span class="log-time">[${time}]</span>
+      <span class="log-msg ${cls}">${s.status} — BAL: ${(s.balance||0).toFixed(2)} | EQ: ${(s.equity||0).toFixed(2)} | STRK: ${s.consec_loss}</span>
     </div>`;
   }).join('');
 }
@@ -664,7 +686,7 @@ function addLogEntry(msg, cls='') {
   const time = new Date().toLocaleTimeString('th-TH');
   const el = document.createElement('div');
   el.className = 'log-entry';
-  el.innerHTML = `<span class="log-time">${time}</span><span class="log-msg ${cls}">${msg}</span>`;
+  el.innerHTML = `<span class="log-time">[${time}]</span><span class="log-msg ${cls}">${msg}</span>`;
   wrap.prepend(el);
 }
 
