@@ -1,638 +1,776 @@
 <!DOCTYPE html>
-<html lang="th" style="color-scheme: dark;">
+<html lang="th">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WexZ Hub — Key System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 <style>
-/* ─── RESET & VARIABLES ─────────────────────── */
+/* ─── RESET & ROOT ─────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* Tech Dashboard Palette */
-  --bg-dark:      #030305;
-  --bg-panel:     #0a0a0f;
-  --bg-card:      #12121a;
-  --bg-card-hover:#1a1a24;
-  
-  --border:       #1f1f2e;
-  --border-focus: #33334d;
-  
-  --text-main:    #ffffff;
-  --text-muted:   #8a8a9e;
-  
-  --accent-cyan:  #00e5ff;
-  --accent-cyan-dim: rgba(0, 229, 255, 0.1);
-  
-  --accent-gold:  #ffaa00;
-  --accent-gold-dim: rgba(255, 170, 0, 0.1);
-  
-  --accent-green: #00ff88;
-  --accent-red:   #ff3366;
-  
-  --font-sans:    'Outfit', sans-serif;
-  --font-mono:    'Space Mono', monospace;
-  --radius-sm:    6px;
-  --radius-md:    12px;
-  --radius-lg:    20px;
+  --bg:       #080808;
+  --surface:  #111111;
+  --card:     #161616;
+  --card2:    #1c1c1c;
+  --border:   rgba(255,255,255,0.07);
+  --border-hi:rgba(255,255,255,0.14);
+  --text:     #f0f0f0;
+  --muted:    #555;
+  --muted2:   #777;
+  --white:    #ffffff;
+  --green:    #3ddc84;
+  --green-dim:#1a3d28;
+  --red:      #ff5f5f;
+  --gold:     #f0c060;
+  --gold-dim: #3a2a08;
+  --mono:     'Space Mono', monospace;
+  --sans:     'Sora', sans-serif;
+  --r:        12px;
+  --r-lg:     20px;
 }
 
 html, body {
   min-height: 100vh;
-  background-color: var(--bg-dark);
-  color: var(--text-main);
-  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
   font-size: 15px;
-  line-height: 1.5;
+  line-height: 1.6;
   overflow-x: hidden;
 }
 
-/* ─── LAYOUT: SPLIT SCREEN ──────────────────── */
-.layout-wrapper {
-  display: flex;
-  min-height: 100vh;
-  flex-direction: row;
+/* ─── NOISE OVERLAY ────────────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.6;
 }
 
-/* ─── LEFT PANEL (BRANDING) ─────────────────── */
-.left-panel {
-  width: 400px;
-  background: var(--bg-panel);
-  border-right: 1px solid var(--border);
-  padding: 40px;
+/* ─── GLOW BG ───────────────────────────────── */
+.bg-glow {
+  position: fixed;
+  width: 600px; height: 600px;
+  border-radius: 50%;
+  filter: blur(120px);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.07;
+}
+.bg-glow-1 { background: #fff; top: -200px; left: -200px; }
+.bg-glow-2 { background: #fff; bottom: -200px; right: -200px; opacity: 0.04; }
+
+/* ─── LAYOUT ────────────────────────────────── */
+.app {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  position: relative;
-  overflow: hidden;
-  z-index: 10;
 }
 
-/* Tech Grid Background in Left Panel */
-.left-panel::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-size: 30px 30px;
-  background-image: 
-    linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
-  mask-image: linear-gradient(to bottom, black 30%, transparent 90%);
-  z-index: -1;
-}
-
-/* Glowing Orb in Left Panel */
-.glow-orb {
-  position: absolute;
-  top: -100px;
-  left: -100px;
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, rgba(0,229,255,0.15) 0%, transparent 70%);
-  filter: blur(40px);
-  z-index: -1;
-}
-
-.brand-wrapper { margin-top: auto; margin-bottom: auto; }
-.brand-logo {
-  font-size: 42px;
-  font-weight: 800;
-  line-height: 1.1;
-  letter-spacing: -0.03em;
-  margin-bottom: 8px;
-}
-.brand-logo span { color: var(--accent-cyan); }
-.brand-sub {
-  font-family: var(--font-mono);
-  color: var(--text-muted);
-  font-size: 13px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.status-widget {
-  margin-top: auto;
-  padding: 16px;
-  background: rgba(255,255,255,0.02);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+nav {
   display: flex;
   align-items: center;
+  padding: 20px 40px;
+  border-bottom: 1px solid var(--border);
   gap: 12px;
 }
-.status-indicator {
-  position: relative;
-  width: 10px; height: 10px;
-  background: var(--accent-green);
-  border-radius: 50%;
-  box-shadow: 0 0 10px var(--accent-green);
+.nav-logo {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.06em;
+  color: var(--white);
 }
-.status-indicator::after {
-  content: ''; position: absolute; top: -4px; left: -4px; right: -4px; bottom: -4px;
-  border: 1px solid var(--accent-green); border-radius: 50%;
-  animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+.nav-logo span { color: var(--muted2); font-weight: 400; }
+.nav-badge {
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 2px 8px;
+  border: 1px solid var(--border-hi);
+  border-radius: 4px;
+  color: var(--muted2);
+  letter-spacing: 0.08em;
 }
-@keyframes ping {
-  75%, 100% { transform: scale(2); opacity: 0; }
+.nav-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.nav-status {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; color: var(--muted2); font-family: var(--mono);
 }
-.status-text { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); }
-.status-text strong { color: var(--text-main); font-size: 13px; display: block; }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 
-/* ─── RIGHT PANEL (CONTENT) ─────────────────── */
-.right-panel {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 40px;
-  position: relative;
-}
-
-.content-container {
-  width: 100%;
-  max-width: 540px;
-  position: relative;
-}
+main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
 
 /* ─── PAGE TRANSITIONS ──────────────────────── */
-.page { display: none; opacity: 0; }
-.page.active { 
-  display: block; 
-  animation: slideLeft 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
+.page {
+  display: none;
+  width: 100%;
+  max-width: 520px;
+  animation: fadeUp 0.35s ease both;
 }
-@keyframes slideLeft {
-  from { opacity: 0; transform: translateX(40px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-
-/* ─── HEADERS & LABELS ──────────────────────── */
-.page-header { margin-bottom: 32px; }
-.page-title {
-  font-size: 28px;
-  font-weight: 700;
-  margin-bottom: 8px;
-  display: flex; align-items: center; gap: 12px;
-}
-.page-desc { color: var(--text-muted); font-size: 15px; }
-
-.section-label {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  margin-bottom: 12px;
+.page.active { display: block; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ─── HORIZONTAL CARDS ──────────────────────── */
-.list-card {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 20px;
-  background: var(--bg-card);
+/* ─── CARDS ─────────────────────────────────── */
+.card {
+  background: var(--card);
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  margin-bottom: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  border-radius: var(--r-lg);
+  padding: 32px;
   position: relative;
   overflow: hidden;
 }
-.list-card::before {
-  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
-  background: transparent; transition: background 0.2s;
-}
-.list-card:hover {
-  background: var(--bg-card-hover);
-  border-color: var(--border-focus);
-  transform: translateX(4px);
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
 }
 
-.list-icon {
-  width: 48px; height: 48px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 20px;
+/* ─── BRAND HEADER ──────────────────────────── */
+.brand-header {
+  text-align: center;
+  margin-bottom: 32px;
 }
-.list-info { flex: 1; }
-.list-title { font-weight: 600; font-size: 16px; color: var(--text-main); margin-bottom: 2px; }
-.list-desc { font-size: 13px; color: var(--text-muted); }
-.list-action {
-  font-family: var(--font-mono);
+.brand-icon {
+  width: 56px; height: 56px;
+  background: var(--card2);
+  border: 1px solid var(--border-hi);
+  border-radius: 14px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  margin-bottom: 16px;
+}
+.brand-title {
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--white);
+  margin-bottom: 4px;
+}
+.brand-sub {
+  font-size: 13px;
+  color: var(--muted2);
+}
+
+/* ─── SECTION LABEL ─────────────────────────── */
+.section-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+/* ─── PLAN CARDS ────────────────────────────── */
+.plan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+
+.plan-card {
+  padding: 18px;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  cursor: pointer;
+  transition: border-color .15s, background .15s, transform .12s;
+  position: relative;
+}
+.plan-card:hover {
+  border-color: var(--border-hi);
+  background: #1f1f1f;
+  transform: translateY(-1px);
+}
+.plan-card.selected { border-color: var(--white); }
+.plan-card .plan-icon { font-size: 20px; margin-bottom: 10px; }
+.plan-card .plan-name {
+  font-family: var(--mono);
   font-size: 12px;
   font-weight: 700;
-  padding: 6px 12px;
-  border-radius: 4px;
+  color: var(--white);
+  margin-bottom: 4px;
 }
-
-/* Card Variations */
-.list-card.free:hover::before { background: var(--accent-cyan); }
-.list-card.free .list-action { color: var(--accent-cyan); background: var(--accent-cyan-dim); }
-
-.list-card.premium:hover::before { background: var(--accent-gold); }
-.list-card.premium .list-action { color: var(--accent-gold); background: var(--accent-gold-dim); }
+.plan-card .plan-desc { font-size: 11px; color: var(--muted2); line-height: 1.5; }
+.plan-card .plan-price {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--gold);
+  margin-top: 10px;
+}
+.plan-card.free .plan-price { color: var(--green); }
+.plan-card .plan-badge {
+  position: absolute; top: 12px; right: 12px;
+  font-family: var(--mono); font-size: 9px;
+  padding: 2px 6px; border-radius: 4px;
+  border: 1px solid;
+}
+.plan-card.free .plan-badge { color: var(--green); border-color: rgba(61,220,132,.25); background: rgba(61,220,132,.06); }
+.plan-card.premium .plan-badge { color: var(--gold); border-color: rgba(240,192,96,.25); background: rgba(240,192,96,.06); }
 
 /* ─── BUTTONS ────────────────────────────────── */
 .btn {
   width: 100%;
-  padding: 16px 24px;
+  padding: 13px 20px;
   border: none;
-  border-radius: var(--radius-sm);
-  font-family: var(--font-sans);
-  font-size: 15px;
+  border-radius: var(--r);
+  font-family: var(--sans);
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all .15s;
   display: flex; align-items: center; justify-content: center; gap: 8px;
 }
-.btn-primary { background: var(--text-main); color: var(--bg-dark); }
-.btn-primary:hover { background: #e0e0e0; transform: translateY(-2px); }
+.btn-primary {
+  background: var(--white);
+  color: #000;
+}
+.btn-primary:hover { background: #e0e0e0; transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(0); }
 
-.btn-cyan { background: var(--accent-cyan); color: var(--bg-dark); box-shadow: 0 4px 15px var(--accent-cyan-dim); }
-.btn-cyan:hover { background: #33eeff; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,229,255,0.3); }
+.btn-outline {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border-hi);
+}
+.btn-outline:hover { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.22); }
 
-.btn-outline { background: transparent; color: var(--text-main); border: 1px solid var(--border); }
-.btn-outline:hover { background: rgba(255,255,255,0.03); border-color: var(--border-focus); }
+.btn-ghost {
+  background: transparent;
+  color: var(--muted2);
+  font-size: 12px;
+  padding: 8px;
+  width: auto;
+}
+.btn-ghost:hover { color: var(--text); }
 
-.btn-ghost { background: transparent; color: var(--text-muted); font-size: 14px; padding: 8px 0; width: auto; display: inline-flex; align-items: center; gap: 6px; }
-.btn-ghost:hover { color: var(--text-main); }
+.btn-green { background: var(--green); color: #000; }
+.btn-green:hover { background: #5ae89e; transform: translateY(-1px); }
 
-.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-gold { background: var(--gold); color: #000; }
+.btn-gold:hover { background: #f5d080; transform: translateY(-1px); }
 
-/* ─── INPUTS ─────────────────────────────────── */
-.input-group { margin-bottom: 24px; }
+.btn + .btn { margin-top: 8px; }
+
+.btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+
+/* ─── INPUT ──────────────────────────────────── */
+.input-group { margin-bottom: 16px; }
 .input-label {
-  display: block; font-family: var(--font-mono); font-size: 11px;
-  color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase;
+  display: block;
+  font-size: 11px;
+  color: var(--muted2);
+  margin-bottom: 6px;
+  font-family: var(--mono);
 }
 .input-field {
   width: 100%;
-  padding: 18px 20px;
-  background: var(--bg-card);
+  padding: 11px 14px;
+  background: var(--card2);
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--accent-cyan);
-  font-family: var(--font-mono);
-  font-size: 15px;
+  border-radius: var(--r);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
   outline: none;
-  transition: all 0.2s;
+  transition: border-color .15s;
 }
-.input-field:focus {
-  border-color: var(--accent-cyan);
-  background: rgba(0,229,255,0.02);
-  box-shadow: inset 4px 0 0 var(--accent-cyan);
-}
-.input-field::placeholder { color: #444; }
+.input-field:focus { border-color: var(--border-hi); }
+.input-field::placeholder { color: var(--muted); }
 
-/* ─── PROGRESS BAR (Instead of Steps) ────────── */
-.progress-container {
-  display: flex; gap: 8px; margin-bottom: 32px;
-}
-.progress-bar {
-  flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden;
-}
-.progress-fill {
-  height: 100%; background: var(--accent-cyan); width: 0%; transition: width 0.4s ease;
-}
-.progress-fill.full { width: 100%; }
-
-/* ─── KEY DISPLAY BOX ────────────────────────── */
-.key-box {
-  background: var(--bg-card);
-  border: 1px solid var(--border-focus);
-  border-radius: var(--radius-sm);
-  padding: 6px;
+/* ─── DIVIDER ────────────────────────────────── */
+.divider {
   display: flex; align-items: center; gap: 12px;
-  margin-bottom: 24px;
+  margin: 20px 0; color: var(--muted); font-size: 11px;
+  font-family: var(--mono);
+}
+.divider::before, .divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+/* ─── STEP INDICATOR ─────────────────────────── */
+.steps {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0; margin-bottom: 28px;
+}
+.step {
+  display: flex; align-items: center; gap: 0;
+}
+.step-dot {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--card2);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 11px;
+  color: var(--muted2);
+  transition: all .2s;
+  flex-shrink: 0;
+}
+.step-dot.active { border-color: var(--white); color: var(--white); background: rgba(255,255,255,.08); }
+.step-dot.done { background: var(--white); color: #000; border-color: var(--white); }
+.step-line { width: 32px; height: 1px; background: var(--border); }
+.step-line.done { background: rgba(255,255,255,.3); }
+
+/* ─── TASK BOX ───────────────────────────────── */
+.task-box {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px;
+  margin-bottom: 16px;
+  display: flex; align-items: center; gap: 14px;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.task-box:hover { border-color: var(--border-hi); background: #1e1e1e; }
+.task-box.done { border-color: rgba(61,220,132,.3); background: rgba(61,220,132,.04); }
+.task-num {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: var(--card); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 12px; font-weight: 700;
+  flex-shrink: 0;
+}
+.task-box.done .task-num { background: var(--green-dim); border-color: rgba(61,220,132,.3); color: var(--green); }
+.task-info { flex: 1; }
+.task-title { font-size: 13px; font-weight: 600; color: var(--white); }
+.task-desc { font-size: 11px; color: var(--muted2); margin-top: 1px; }
+.task-status { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.task-box.done .task-status { color: var(--green); }
+
+/* ─── KEY DISPLAY ────────────────────────────── */
+.key-display {
+  background: var(--card2);
+  border: 1px solid var(--border-hi);
+  border-radius: var(--r);
+  padding: 16px 18px;
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 16px;
 }
 .key-value {
   flex: 1;
-  padding: 12px 16px;
-  font-family: var(--font-mono);
-  font-size: 15px;
-  color: var(--accent-cyan);
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--white);
+  letter-spacing: 0.04em;
   word-break: break-all;
 }
-.key-copy {
-  width: 48px; height: 48px;
-  background: var(--border);
-  border: none; border-radius: 4px;
-  color: var(--text-main); font-size: 18px; cursor: pointer;
-  transition: all 0.2s;
+.key-copy-btn {
+  flex-shrink: 0;
+  width: 32px; height: 32px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 14px;
+  transition: all .15s; color: var(--muted2);
 }
-.key-copy:hover { background: var(--border-focus); color: var(--accent-cyan); }
-.key-copy.copied { background: var(--accent-cyan); color: var(--bg-dark); }
+.key-copy-btn:hover { border-color: var(--border-hi); color: var(--white); }
+.key-copy-btn.copied { background: var(--green-dim); border-color: rgba(61,220,132,.3); color: var(--green); }
 
-/* ─── ALERTS & INFO ──────────────────────────── */
-.alert {
-  padding: 16px 20px;
-  border-radius: var(--radius-sm);
-  font-size: 14px;
-  margin-bottom: 24px;
-  display: flex; align-items: flex-start; gap: 12px;
-  border-left: 3px solid;
-}
-.alert-info { background: rgba(255,255,255,0.03); border-color: var(--text-muted); color: var(--text-muted); }
-.alert-success { background: var(--accent-cyan-dim); border-color: var(--accent-cyan); color: var(--accent-cyan); }
-.alert-warn { background: var(--accent-gold-dim); border-color: var(--accent-gold); color: var(--accent-gold); }
-.alert-error { background: rgba(255,51,102,0.1); border-color: var(--accent-red); color: var(--accent-red); }
-
-.info-list { margin-bottom: 24px; }
-.info-item {
-  display: flex; align-items: flex-start; gap: 12px;
-  padding: 12px 0; border-bottom: 1px solid var(--border);
-}
-.info-item:last-child { border-bottom: none; }
-.info-item .num { 
-  font-family: var(--font-mono); font-size: 12px; color: var(--bg-dark); background: var(--text-muted);
-  width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 4px; flex-shrink: 0; margin-top: 2px;
-}
-.info-item .text { font-size: 14px; color: var(--text-muted); }
-.info-item .text strong { color: var(--text-main); }
-
-/* ─── TIMER DIGITS ───────────────────────────── */
-.timer-hero {
+/* ─── TIMER ──────────────────────────────────── */
+.timer-display {
   text-align: center;
-  font-family: var(--font-mono);
-  font-size: 48px;
+  font-family: var(--mono);
+  font-size: 28px;
   font-weight: 700;
-  color: var(--text-main);
-  margin-bottom: 8px;
-  letter-spacing: -0.02em;
+  color: var(--white);
+  letter-spacing: 0.06em;
+  margin: 8px 0;
 }
+.timer-label { text-align: center; font-size: 11px; color: var(--muted2); margin-bottom: 20px; }
+.timer-bar-wrap {
+  height: 3px; background: var(--border); border-radius: 2px; margin-bottom: 20px; overflow: hidden;
+}
+.timer-bar {
+  height: 100%; background: var(--white); border-radius: 2px;
+  transition: width 1s linear;
+}
+
+/* ─── INFO ROW ───────────────────────────────── */
+.info-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+.info-row .info-icon { font-size: 14px; flex-shrink: 0; }
+.info-row .info-text { color: var(--muted2); }
+.info-row .info-text strong { color: var(--text); }
+
+/* ─── ALERT ──────────────────────────────────── */
+.alert {
+  padding: 11px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  margin-bottom: 14px;
+  display: flex; align-items: flex-start; gap: 8px;
+}
+.alert-info { background: rgba(255,255,255,.04); border: 1px solid var(--border); color: var(--muted2); }
+.alert-success { background: rgba(61,220,132,.07); border: 1px solid rgba(61,220,132,.2); color: var(--green); }
+.alert-warn { background: rgba(240,192,96,.07); border: 1px solid rgba(240,192,96,.2); color: var(--gold); }
+.alert-error { background: rgba(255,95,95,.07); border: 1px solid rgba(255,95,95,.2); color: var(--red); }
 
 /* ─── SPINNER ────────────────────────────────── */
 .spinner {
-  display: inline-block; width: 16px; height: 16px;
-  border: 2px solid rgba(0,0,0,0.2); border-top-color: currentColor;
-  border-radius: 50%; animation: spin 0.6s linear infinite;
+  display: inline-block;
+  width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,.2);
+  border-top-color: var(--white);
+  border-radius: 50%;
+  animation: spin .6s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ─── RESPONSIVE ─────────────────────────────── */
-@media (max-width: 900px) {
-  .layout-wrapper { flex-direction: column; }
-  .left-panel {
-    width: 100%; padding: 24px; border-right: none; border-bottom: 1px solid var(--border);
-    flex-direction: row; align-items: center; justify-content: space-between;
-  }
-  .brand-wrapper { margin: 0; }
-  .brand-logo { font-size: 24px; margin-bottom: 2px; }
-  .brand-sub { font-size: 10px; }
-  .status-widget { margin: 0; padding: 8px 12px; }
-  .status-text strong { font-size: 11px; display: inline; margin-left: 4px; }
-  .right-panel { padding: 24px 16px; align-items: flex-start; }
-  .glow-orb { display: none; }
+/* ─── RETURN OPTION CARDS ────────────────────── */
+.option-grid { display: grid; gap: 10px; margin-bottom: 20px; }
+.option-card {
+  padding: 16px;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+  display: flex; align-items: center; gap: 14px;
+}
+.option-card:hover { border-color: var(--border-hi); background: #1e1e1e; }
+.option-icon { font-size: 20px; flex-shrink: 0; }
+.option-info .opt-title { font-size: 13px; font-weight: 600; color: var(--white); }
+.option-info .opt-desc { font-size: 11px; color: var(--muted2); margin-top: 2px; }
+.option-arrow { margin-left: auto; color: var(--muted); font-size: 16px; }
+
+/* ─── FOOTER ─────────────────────────────────── */
+footer {
+  text-align: center;
+  padding: 20px;
+  font-size: 11px;
+  color: var(--muted);
+  font-family: var(--mono);
+  border-top: 1px solid var(--border);
+}
+footer a { color: var(--muted2); text-decoration: none; }
+footer a:hover { color: var(--text); }
+
+/* ─── CONFIG NOTICE ─────────────────────────── */
+.config-notice {
+  background: rgba(240,192,96,.06);
+  border: 1px solid rgba(240,192,96,.18);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--gold);
+  margin-bottom: 20px;
 }
 </style>
 </head>
 <body>
 
-<div class="layout-wrapper">
-  
-  <!-- ════════ LEFT PANEL ════════ -->
-  <aside class="left-panel">
-    <div class="glow-orb"></div>
-    <div class="brand-wrapper">
-      <div class="brand-logo">WEXZ<span>.</span>HUB</div>
-      <div class="brand-sub">Advanced Key System</div>
-    </div>
-    
-    <div class="status-widget">
-      <div class="status-indicator"></div>
-      <div class="status-text">
-        SYSTEM STATUS
-        <strong>OPERATIONAL</strong>
+<!-- BG Glows -->
+<div class="bg-glow bg-glow-1"></div>
+<div class="bg-glow bg-glow-2"></div>
+
+<div class="app">
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">WEXZ<span>/</span>HUB</div>
+    <div class="nav-badge">KEY SYSTEM</div>
+    <div class="nav-right">
+      <div class="nav-status">
+        <span class="status-dot"></span>
+        <span>Server Online</span>
       </div>
     </div>
-  </aside>
+  </nav>
 
-  <!-- ════════ RIGHT PANEL ════════ -->
-  <main class="right-panel">
-    <div class="content-container">
+  <main>
 
-      <!-- ════════ PAGE 0: DASHBOARD ════════ -->
-      <div class="page active" id="page-choose">
-        <div class="page-header">
-          <div class="page-title">Select License Type</div>
-          <div class="page-desc">เลือกระบบคีย์ที่ต้องการใช้งานสำหรับสคริปต์</div>
+    <!-- ════════ PAGE 0: CHOOSE TYPE ════════ -->
+    <div class="page active" id="page-choose">
+      <div class="card">
+        <div class="brand-header">
+          <div class="brand-icon">⚔️</div>
+          <div class="brand-title">WexZ Hub</div>
+          <div class="brand-sub">เลือกประเภทคีย์ที่ต้องการ</div>
         </div>
 
-        <div class="section-label">Available Plans</div>
-        
-        <!-- Standard Card -->
-        <div class="list-card free" onclick="selectPlan('free')">
-          <div class="list-icon">⚡</div>
-          <div class="list-info">
-            <div class="list-title">Standard Access</div>
-            <div class="list-desc">ใช้งานฟรี 24 ชั่วโมง (ทำ 1 Task)</div>
+        <div class="section-label">เลือกแพลน</div>
+        <div class="plan-grid">
+          <div class="plan-card free" onclick="selectPlan('free')">
+            <div class="plan-badge">24HR</div>
+            <div class="plan-icon">⏱️</div>
+            <div class="plan-name">Free Key</div>
+            <div class="plan-desc">ทำ task สั้นๆ แล้วได้คีย์ฟรี</div>
+            <div class="plan-price">ฟรี</div>
           </div>
-          <div class="list-action">FREE</div>
-        </div>
-
-        <!-- Premium Card -->
-        <div class="list-card premium" onclick="selectPlan('premium')">
-          <div class="list-icon">👑</div>
-          <div class="list-info">
-            <div class="list-title">Premium Lifetime</div>
-            <div class="list-desc">ไม่ต้องทำ Task ใช้งานได้ถาวร</div>
+          <div class="plan-card premium" onclick="selectPlan('premium')">
+            <div class="plan-badge">∞</div>
+            <div class="plan-icon">👑</div>
+            <div class="plan-name">Permanent</div>
+            <div class="plan-desc">คีย์ถาวร ไม่ต้องทำซ้ำ</div>
+            <div class="plan-price">ติดต่อ Admin</div>
           </div>
-          <div class="list-action">BUY</div>
         </div>
 
-        <div class="section-label" style="margin-top: 32px;">Existing Users</div>
+        <div class="divider">หรือ</div>
+
         <button class="btn btn-outline" onclick="goTo('page-return')">
-          Manage License / Check Status →
+          🔑 มีคีย์เก่าอยู่แล้ว / เช็คสถานะ
         </button>
+
+        <div class="info-row" style="margin-top:16px">
+          <span class="info-icon">💡</span>
+          <span class="info-text">1 คีย์ต่อ 1 เครื่อง (HWID-based) — คีย์จะผูกกับเครื่องของคุณอัตโนมัติ</span>
+        </div>
       </div>
+    </div>
 
-      <!-- ════════ PAGE 1: TASK ════════ -->
-      <div class="page" id="page-task">
-        <button class="btn-ghost" onclick="goTo('page-choose')">← Return</button>
-        
-        <div class="progress-container" style="margin-top: 20px;">
-          <div class="progress-bar"><div class="progress-fill full"></div></div>
-          <div class="progress-bar"><div class="progress-fill"></div></div>
-          <div class="progress-bar"><div class="progress-fill"></div></div>
-        </div>
+    <!-- ════════ PAGE 1: FREE KEY — TASK ════════ -->
+    <div class="page" id="page-task">
+      <div class="card">
+        <button class="btn-ghost" onclick="goTo('page-choose')" style="margin-bottom:16px;padding-left:0">← กลับ</button>
 
-        <div class="page-header">
-          <div class="page-title">Task Verification</div>
-          <div class="page-desc">ทำภารกิจเพื่อยืนยันตัวตนและรับคีย์</div>
-        </div>
-
-        <!-- Task Item -->
-        <div class="list-card" id="task-box-1" onclick="completeTask(1)" style="border-left: 3px solid var(--border-focus);">
-          <div class="list-icon" style="background: var(--bg-dark);" id="task-num-1">1</div>
-          <div class="list-info">
-            <div class="list-title">Visit Sponsor Link</div>
-            <div class="list-desc">เข้าชมเว็บไซต์และรอ 15 วินาที</div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-dot active" id="step1">1</div>
           </div>
-          <div class="list-action" id="task-status-1" style="background: var(--border-focus); color: var(--text-main);">START</div>
+          <div class="step-line" id="line1"></div>
+          <div class="step">
+            <div class="step-dot" id="step2">2</div>
+          </div>
+          <div class="step-line" id="line2"></div>
+          <div class="step">
+            <div class="step-dot" id="step3">✓</div>
+          </div>
+        </div>
+
+        <div class="brand-header" style="margin-bottom:20px">
+          <div class="brand-title" style="font-size:18px">ทำ Task เพื่อรับคีย์ฟรี</div>
+          <div class="brand-sub">ทำให้ครบ 1 task แล้วกด "สร้างคีย์"</div>
+        </div>
+
+        <div id="task-list">
+          <div class="task-box" id="task-box-1" onclick="completeTask(1)">
+            <div class="task-num" id="task-num-1">1</div>
+            <div class="task-info">
+              <div class="task-title">เข้า Link สนับสนุน</div>
+              <div class="task-desc">กดลิงก์ด้านล่างแล้วรอ 15 วินาที</div>
+            </div>
+            <div class="task-status" id="task-status-1">กด →</div>
+          </div>
         </div>
 
         <div class="alert alert-info" id="task-alert">
-          กรุณากดเริ่ม Task ด้านบนเพื่อปลดล็อคขั้นตอนถัดไป
+          ⚡ กด task ด้านบนก่อน จึงจะสร้างคีย์ได้
         </div>
 
         <button class="btn btn-primary" id="btn-gen" onclick="goToGenerate()" disabled>
-          Continue to Verification
+          สร้างคีย์ฟรี (24 ชั่วโมง)
         </button>
       </div>
+    </div>
 
-      <!-- ════════ PAGE 2: HWID ════════ -->
-      <div class="page" id="page-generate">
-        <button class="btn-ghost" onclick="goTo('page-task')">← Back to Tasks</button>
+    <!-- ════════ PAGE 2: ENTER HWID & GENERATE ════════ -->
+    <div class="page" id="page-generate">
+      <div class="card">
+        <button class="btn-ghost" onclick="goTo('page-task')" style="margin-bottom:16px;padding-left:0">← กลับ</button>
 
-        <div class="progress-container" style="margin-top: 20px;">
-          <div class="progress-bar"><div class="progress-fill full"></div></div>
-          <div class="progress-bar"><div class="progress-fill full"></div></div>
-          <div class="progress-bar"><div class="progress-fill"></div></div>
+        <div class="steps">
+          <div class="step"><div class="step-dot done">✓</div></div>
+          <div class="step-line done"></div>
+          <div class="step"><div class="step-dot active" id="step2b">2</div></div>
+          <div class="step-line" id="line2b"></div>
+          <div class="step"><div class="step-dot" id="step3b">3</div></div>
         </div>
 
-        <div class="page-header">
-          <div class="page-title">Hardware Binding</div>
-          <div class="page-desc">ป้อน Hardware ID เพื่อผูกมัดกับคีย์นี้</div>
+        <div class="brand-header" style="margin-bottom:20px">
+          <div class="brand-title" style="font-size:18px">ระบุ HWID ของคุณ</div>
+          <div class="brand-sub">คัดลอก HWID จากสคริปต์ในเกมแล้วใส่ที่นี่</div>
+        </div>
+
+        <div class="alert alert-info" style="margin-bottom:18px">
+          💻 รันสคริปต์ใน Roblox แล้วดู HWID ที่แสดงในช่อง Output
         </div>
 
         <div class="input-group">
-          <label class="input-label">Terminal / Console HWID</label>
+          <label class="input-label">HWID ของเครื่องคุณ</label>
           <input class="input-field" id="hwid-input" type="text"
-            placeholder="WEXZ-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false">
+            placeholder="WEXZ-XXXXXXXX-XXXX-XXXX" autocomplete="off" spellcheck="false">
         </div>
 
         <div id="gen-alert"></div>
 
-        <button class="btn btn-cyan" id="btn-create-key" onclick="createFreeKey()">
-          Generate License
+        <button class="btn btn-green" id="btn-create-key" onclick="createFreeKey()">
+          ✦ สร้างคีย์
         </button>
       </div>
+    </div>
 
-      <!-- ════════ PAGE 3: KEY RESULT ════════ -->
-      <div class="page" id="page-key">
-        <div class="progress-container" style="margin-top: 20px;">
-          <div class="progress-bar"><div class="progress-fill full"></div></div>
-          <div class="progress-bar"><div class="progress-fill full"></div></div>
-          <div class="progress-bar"><div class="progress-fill full" style="background: var(--accent-green);"></div></div>
+    <!-- ════════ PAGE 3: KEY RESULT ════════ -->
+    <div class="page" id="page-key">
+      <div class="card">
+        <div class="brand-header" style="margin-bottom:20px">
+          <div class="brand-icon">🎉</div>
+          <div class="brand-title" style="font-size:18px">ได้คีย์แล้ว!</div>
+          <div class="brand-sub">นำคีย์ไปใส่ในสคริปต์ใน Roblox</div>
         </div>
 
-        <div class="page-header">
-          <div class="page-title" style="color: var(--accent-green);">Generation Successful</div>
-          <div class="page-desc">คัดลอกคีย์ด้านล่างเพื่อนำไปใช้งานในสคริปต์</div>
-        </div>
-
-        <div class="section-label">License Key</div>
-        <div class="key-box">
+        <div class="section-label">คีย์ของคุณ</div>
+        <div class="key-display">
           <div class="key-value" id="result-key">—</div>
-          <button class="key-copy" id="copy-key-btn" onclick="copyKey()">
-            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-          </button>
+          <div class="key-copy-btn" id="copy-key-btn" onclick="copyKey()">📋</div>
         </div>
 
-        <div id="key-type-badge" class="alert alert-success"></div>
+        <div id="key-type-badge" class="alert alert-success" style="margin-bottom:16px"></div>
 
-        <div id="timer-section" style="display:none; margin: 32px 0;">
-          <div class="section-label" style="text-align: center;">Time Remaining</div>
-          <div class="timer-hero" id="countdown">23:59:59</div>
+        <div id="timer-section" style="display:none">
+          <div class="timer-display" id="countdown">23:59:59</div>
+          <div class="timer-label">เวลาที่เหลือ</div>
+          <div class="timer-bar-wrap">
+            <div class="timer-bar" id="timer-bar" style="width:100%"></div>
+          </div>
+        </div>
+
+        <div class="section-label">วิธีใช้งาน</div>
+        <div class="info-row">
+          <span class="info-icon">1️⃣</span>
+          <span class="info-text">Copy คีย์ด้านบน</span>
+        </div>
+        <div class="info-row">
+          <span class="info-icon">2️⃣</span>
+          <span class="info-text">รัน Script ใน Roblox Executor</span>
+        </div>
+        <div class="info-row" style="margin-bottom:20px">
+          <span class="info-icon">3️⃣</span>
+          <span class="info-text">ใส่คีย์ในช่องที่ขึ้นมา แล้วกด Verify</span>
         </div>
 
         <button class="btn btn-outline" onclick="goTo('page-choose')">
-          Return to Dashboard
+          ← กลับหน้าหลัก
         </button>
       </div>
+    </div>
 
-      <!-- ════════ PAGE 4: RETURN / CHECK ════════ -->
-      <div class="page" id="page-return">
-        <button class="btn-ghost" onclick="goTo('page-choose')">← Return</button>
+    <!-- ════════ PAGE 4: RETURN / CHECK ════════ -->
+    <div class="page" id="page-return">
+      <div class="card">
+        <button class="btn-ghost" onclick="goTo('page-choose')" style="margin-bottom:16px;padding-left:0">← กลับ</button>
 
-        <div class="page-header" style="margin-top: 20px;">
-          <div class="page-title">License Manager</div>
-          <div class="page-desc">ตรวจสอบคีย์เดิมหรือดูสถานะการใช้งาน</div>
+        <div class="brand-header" style="margin-bottom:20px">
+          <div class="brand-title" style="font-size:18px">เช็คคีย์เดิม</div>
+          <div class="brand-sub">ใส่ HWID เพื่อตรวจสอบคีย์ที่มีอยู่</div>
         </div>
 
         <div class="input-group">
-          <label class="input-label">Enter HWID</label>
+          <label class="input-label">HWID ของเครื่องคุณ</label>
           <input class="input-field" id="return-hwid" type="text"
-            placeholder="WEXZ-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false">
+            placeholder="WEXZ-XXXXXXXX-XXXX-XXXX" autocomplete="off" spellcheck="false">
         </div>
 
         <div id="return-alert"></div>
 
         <button class="btn btn-primary" onclick="checkExistingKey()">
-          Check Database
+          🔍 ตรวจสอบคีย์
         </button>
 
         <!-- ผลการตรวจสอบ -->
-        <div id="return-result" style="display:none; margin-top:32px">
-          <div class="section-label">Found License</div>
-          <div class="key-box">
-            <div class="key-value" id="return-key-val" style="font-size: 13px;">—</div>
-            <button class="key-copy" id="copy-return-btn" onclick="copyReturnKey()">
-              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-            </button>
+        <div id="return-result" style="display:none; margin-top:20px">
+          <div class="divider">ผลการตรวจสอบ</div>
+
+          <div class="section-label">คีย์ที่พบ</div>
+          <div class="key-display">
+            <div class="key-value" id="return-key-val">—</div>
+            <div class="key-copy-btn" onclick="copyReturnKey()">📋</div>
           </div>
 
-          <div id="return-status-badge" class="alert"></div>
+          <div id="return-status-badge" class="alert" style="margin-bottom:16px"></div>
 
-          <div class="section-label">Available Actions</div>
-          <div class="list-card" id="opt-use-old" onclick="useOldKey()">
-            <div class="list-info">
-              <div class="list-title">Use Active Key</div>
-              <div class="list-desc">ใช้งานคีย์ที่ยังไม่หมดอายุต่อ</div>
+          <div class="section-label">คุณต้องการ</div>
+          <div class="option-grid">
+            <div class="option-card" id="opt-use-old" onclick="useOldKey()">
+              <div class="option-icon">✅</div>
+              <div class="option-info">
+                <div class="opt-title">ใช้คีย์เดิม</div>
+                <div class="opt-desc">Copy คีย์นี้ไปใช้ต่อ</div>
+              </div>
+              <div class="option-arrow">›</div>
             </div>
-            <div class="list-action" style="background: rgba(255,255,255,0.05);">SELECT</div>
-          </div>
-          
-          <div class="list-card" id="opt-regen" onclick="regenKey()">
-            <div class="list-info">
-              <div class="list-title" style="color: var(--accent-cyan);">Generate New Key</div>
-              <div class="list-desc">รับคีย์ 24H ใหม่ (ต้องทำ Task)</div>
+            <div class="option-card" id="opt-regen" onclick="regenKey()">
+              <div class="option-icon">🔄</div>
+              <div class="option-info">
+                <div class="opt-title">สร้างคีย์ใหม่</div>
+                <div class="opt-desc">ทำ Task แล้วรับคีย์ใหม่</div>
+              </div>
+              <div class="option-arrow">›</div>
             </div>
-            <div class="list-action" style="color: var(--accent-cyan); background: var(--accent-cyan-dim);">START</div>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- ════════ PAGE 5: PREMIUM ════════ -->
-      <div class="page" id="page-premium">
-        <button class="btn-ghost" onclick="goTo('page-choose')">← Return</button>
+    <!-- ════════ PAGE 5: PREMIUM ════════ -->
+    <div class="page" id="page-premium">
+      <div class="card">
+        <button class="btn-ghost" onclick="goTo('page-choose')" style="margin-bottom:16px;padding-left:0">← กลับ</button>
 
-        <div class="page-header" style="margin-top: 20px;">
-          <div class="page-title" style="color: var(--accent-gold);">Premium Lifetime</div>
-          <div class="page-desc">ยกระดับการใช้งานแบบไม่มีข้อจำกัดและถาวร</div>
+        <div class="brand-header" style="margin-bottom:20px">
+          <div class="brand-icon">👑</div>
+          <div class="brand-title" style="font-size:18px">Permanent Key</div>
+          <div class="brand-sub">คีย์ถาวร ไม่หมดอายุ ไม่ต้องทำ task</div>
         </div>
 
-        <div class="alert alert-warn" style="border-left-width: 4px;">
-          Premium Key จำเป็นต้องสั่งซื้อผ่านผู้ดูแลระบบ (Admin) โดยตรงเท่านั้น
+        <div class="alert alert-warn" style="margin-bottom:20px">
+          👑 คีย์ถาวรต้องซื้อผ่าน Admin โดยตรง
         </div>
 
-        <div class="info-list">
-          <div class="info-item">
-            <div class="num" style="background: var(--accent-gold);">1</div>
-            <div class="text"><strong>ถาวรไม่มีหมดอายุ</strong> — ลืมการทำ Task รายวันไปได้เลย</div>
-          </div>
-          <div class="info-item">
-            <div class="num" style="background: var(--accent-gold);">2</div>
-            <div class="text"><strong>ผูกติดกับเครื่อง (HWID Locked)</strong> — ปลอดภัยสำหรับคุณคนเดียว</div>
-          </div>
-          <div class="info-item">
-            <div class="num" style="background: var(--accent-gold);">3</div>
-            <div class="text"><strong>จัดการรวดเร็ว</strong> — แอดมินเพิ่มเข้าระบบฐานข้อมูลให้ทันที</div>
-          </div>
+        <div class="info-row">
+          <span class="info-icon">✦</span>
+          <span class="info-text"><strong>คีย์ถาวร</strong> — ใช้ได้ตลอด ไม่มีวันหมดอายุ</span>
+        </div>
+        <div class="info-row">
+          <span class="info-icon">🔒</span>
+          <span class="info-text"><strong>ผูก HWID</strong> — 1 คีย์ต่อ 1 เครื่อง</span>
+        </div>
+        <div class="info-row">
+          <span class="info-icon">⚡</span>
+          <span class="info-text"><strong>รับทันที</strong> — Admin ใส่ให้ใน Supabase</span>
+        </div>
+        <div class="info-row" style="margin-bottom:24px">
+          <span class="info-icon">💬</span>
+          <span class="info-text"><strong>ช่องทาง</strong> — Discord / Line ของ Admin WexZ</span>
         </div>
 
-        <button class="btn btn-outline" style="border-color: var(--accent-gold); color: var(--accent-gold);" onclick="alert('กรุณาติดต่อ Admin ทาง Discord หรือ Line!')">
-          Contact Admin to Purchase
+        <button class="btn btn-gold" onclick="alert('ติดต่อ Admin ผ่าน Discord หรือ Line!')">
+          👑 ติดต่อ Admin
+        </button>
+        <button class="btn btn-outline" style="margin-top:8px" onclick="goTo('page-return')">
+          🔑 มีคีย์ถาวรอยู่แล้ว? เช็คที่นี่
         </button>
       </div>
-
     </div>
+
   </main>
+
+  <footer>
+    WexZ Hub Key System — Powered by
+    <a href="https://supabase.com" target="_blank">Supabase</a> &nbsp;·&nbsp;
+    <span id="footer-time"></span>
+  </footer>
 </div>
 
 <script>
@@ -643,7 +781,7 @@ const CONFIG = {
   SUPABASE_URL    : "https://srnregbpupnzihgwuskk.supabase.co",   // ← ใส่ Project URL
   SUPABASE_ANON   : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNybnJlZ2JwdXBuemloZ3d1c2trIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwODMwMTgsImV4cCI6MjA5MzY1OTAxOH0.Z2e7Vh5heMKmyQdgQi3EFGEF1_ToYwkJwcmwoV9miG8",               // ← ใส่ anon key
   TASK_LINK       : "https://work.ink/2tB2/RSQ-0fe41fb1-32bb-4f93-8804-a6ddd8a37f16",            // ← ใส่ลิงก์ task
-  TASK_WAIT_SEC   : 15,                                        // วินาทีรอก่อนนับว่าทำเสร็จ
+  TASK_WAIT_SEC   : 10,                                        // วินาทีรอก่อนนับว่าทำเสร็จ
 };
 
 // ══════════════════════════════════════════════════
@@ -724,25 +862,21 @@ function completeTask(n) {
 
   // start countdown
   let sec = CONFIG.TASK_WAIT_SEC;
-  status.textContent = `WAIT ${sec}S`;
+  status.textContent = `รอ ${sec}s...`;
   if (taskTimer) clearInterval(taskTimer);
 
   taskTimer = setInterval(() => {
     sec--;
-    status.textContent = `WAIT ${sec}S`;
+    status.textContent = `รอ ${sec}s...`;
     if (sec <= 0) {
       clearInterval(taskTimer);
-      box.style.borderLeftColor = 'var(--accent-cyan)';
+      box.classList.add('done');
       num.textContent = '✓';
-      num.style.background = 'var(--accent-cyan)';
-      num.style.color = 'var(--bg-dark)';
-      status.textContent = 'DONE';
-      status.style.background = 'var(--accent-cyan-dim)';
-      status.style.color = 'var(--accent-cyan)';
+      status.textContent = 'เสร็จแล้ว';
       taskDone = true;
       document.getElementById('btn-gen').disabled = false;
       document.getElementById('task-alert').className = 'alert alert-success';
-      document.getElementById('task-alert').innerHTML = 'Task สำเร็จ! กดปุ่ม <strong>Continue</strong> เพื่อไปต่อ';
+      document.getElementById('task-alert').textContent = '✅ Task เสร็จแล้ว! กด "สร้างคีย์ฟรี" ได้เลย';
     }
   }, 1000);
 }
@@ -761,12 +895,12 @@ async function createFreeKey() {
   const btn = document.getElementById('btn-create-key');
 
   if (!hwid || hwid.length < 8) {
-    alertEl.innerHTML = '<div class="alert alert-error">รูปแบบ HWID ไม่ถูกต้อง</div>';
+    alertEl.innerHTML = '<div class="alert alert-error">⚠️ กรุณาใส่ HWID ให้ถูกต้อง</div>';
     return;
   }
 
   // loading state
-  btn.innerHTML = '<span class="spinner"></span> Generating...';
+  btn.innerHTML = '<span class="spinner"></span> กำลังสร้างคีย์...';
   btn.disabled = true;
   alertEl.innerHTML = '';
 
@@ -781,8 +915,8 @@ async function createFreeKey() {
 
       if (row.is_permanent || exp > now) {
         // key still valid
-        alertEl.innerHTML = `<div class="alert alert-warn">HWID นี้มีคีย์อยู่แล้วและยังไม่หมดอายุ โปรดเช็คที่เมนู Manage License</div>`;
-        btn.innerHTML = 'Generate License';
+        alertEl.innerHTML = `<div class="alert alert-warn">⚠️ HWID นี้มีคีย์อยู่แล้วและยังไม่หมดอายุ — กลับไปหน้าเช็คคีย์เดิมแทน</div>`;
+        btn.innerHTML = '✦ สร้างคีย์';
         btn.disabled = false;
         return;
       }
@@ -808,8 +942,8 @@ async function createFreeKey() {
     showKeyResult(newKey, false, expiresAt);
 
   } catch (e) {
-    alertEl.innerHTML = `<div class="alert alert-error">Error: ${e.message}</div>`;
-    btn.innerHTML = 'Generate License';
+    alertEl.innerHTML = `<div class="alert alert-error">❌ เกิดข้อผิดพลาด: ${e.message}</div>`;
+    btn.innerHTML = '✦ สร้างคีย์';
     btn.disabled = false;
   }
 }
@@ -825,18 +959,18 @@ async function checkExistingKey() {
   const result  = document.getElementById('return-result');
 
   if (!hwid || hwid.length < 8) {
-    alertEl.innerHTML = '<div class="alert alert-error">รูปแบบ HWID ไม่ถูกต้อง</div>';
+    alertEl.innerHTML = '<div class="alert alert-error">⚠️ กรุณาใส่ HWID ให้ถูกต้อง</div>';
     return;
   }
 
-  alertEl.innerHTML = '<div class="alert alert-info"><span class="spinner"></span> Querying Database...</div>';
+  alertEl.innerHTML = '<div class="alert alert-info"><span class="spinner"></span> กำลังตรวจสอบ...</div>';
   result.style.display = 'none';
 
   try {
     const rows = await sb_get('keys', `hwid=eq.${encodeURIComponent(hwid)}`);
 
     if (!rows || rows.length === 0) {
-      alertEl.innerHTML = '<div class="alert alert-error">ไม่พบข้อมูล HWID นี้ในระบบ</div>';
+      alertEl.innerHTML = '<div class="alert alert-warn">⚠️ ไม่พบคีย์สำหรับ HWID นี้ — กลับไปสร้างคีย์ใหม่</div>';
       return;
     }
 
@@ -851,19 +985,19 @@ async function checkExistingKey() {
 
     const badge = document.getElementById('return-status-badge');
     if (row.is_permanent) {
-      badge.className = 'alert alert-warn';
-      badge.innerHTML = 'สถานะ: <strong>Premium (ถาวร)</strong>';
+      badge.className = 'alert alert-success';
+      badge.textContent = '✅ คีย์ถาวร — ยังใช้งานได้';
       document.getElementById('opt-regen').style.display = 'none';
     } else if (isValid) {
       const remaining = Math.floor((exp - now) / 1000);
       const h = Math.floor(remaining/3600);
       const m = Math.floor((remaining%3600)/60);
       badge.className = 'alert alert-success';
-      badge.innerHTML = `สถานะ: <strong>Active</strong> (เหลือ ${h}h ${m}m)`;
+      badge.textContent = `✅ คีย์ยังใช้ได้ — เหลือ ${h}h ${m}m`;
       document.getElementById('opt-regen').style.display = 'flex';
     } else {
       badge.className = 'alert alert-error';
-      badge.innerHTML = 'สถานะ: <strong>Expired (หมดอายุ)</strong>';
+      badge.textContent = '❌ คีย์หมดอายุแล้ว — ต้องสร้างใหม่';
       document.getElementById('opt-use-old').style.display = 'none';
     }
 
@@ -871,7 +1005,7 @@ async function checkExistingKey() {
     result.style.display = 'block';
 
   } catch (e) {
-    alertEl.innerHTML = `<div class="alert alert-error">Error: ${e.message}</div>`;
+    alertEl.innerHTML = `<div class="alert alert-error">❌ เกิดข้อผิดพลาด: ${e.message}</div>`;
   }
 }
 
@@ -887,22 +1021,13 @@ function useOldKey() {
 function regenKey() {
   // reset task state and go to task page
   taskDone = false;
-  const box = document.getElementById('task-box-1');
-  const num = document.getElementById('task-num-1');
-  const status = document.getElementById('task-status-1');
-  
-  box.style.borderLeftColor = 'var(--border-focus)';
-  num.textContent = '1';
-  num.style.background = 'var(--bg-dark)';
-  num.style.color = 'var(--text-main)';
-  status.textContent = 'START';
-  status.style.background = 'var(--border-focus)';
-  status.style.color = 'var(--text-main)';
-  
+  document.getElementById('task-box-1').classList.remove('done');
+  document.getElementById('task-num-1').textContent = '1';
+  document.getElementById('task-status-1').textContent = 'กด →';
   document.getElementById('btn-gen').disabled = true;
   document.getElementById('task-alert').className = 'alert alert-info';
-  document.getElementById('task-alert').textContent = 'กรุณากดเริ่ม Task ด้านบนเพื่อปลดล็อคขั้นตอนถัดไป';
-  
+  document.getElementById('task-alert').textContent = '⚡ กด task ด้านบนก่อน จึงจะสร้างคีย์ได้';
+  // pre-fill hwid from return page
   if (returnKeyData) {
     document.getElementById('hwid-input').value = returnKeyData.hwid;
   }
@@ -922,11 +1047,11 @@ function showKeyResult(key, isPermanent, expiresAt) {
 
   if (isPermanent) {
     badge.className = 'alert alert-warn';
-    badge.innerHTML = 'License Type: <strong>PREMIUM LIFETIME</strong>';
+    badge.textContent = '👑 คีย์ถาวร — ไม่มีวันหมดอายุ';
     timerSec.style.display = 'none';
   } else {
     badge.className = 'alert alert-success';
-    badge.innerHTML = 'License Type: <strong>STANDARD (24 HOURS)</strong>';
+    badge.textContent = '⏱️ คีย์ฟรี — หมดอายุใน 24 ชั่วโมง';
     timerSec.style.display = 'block';
     startCountdown(new Date(expiresAt));
   }
@@ -945,6 +1070,8 @@ function startCountdown(expDate) {
     const s    = diff % 60;
     document.getElementById('countdown').textContent =
       `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    const pct = (diff / 86400) * 100;
+    document.getElementById('timer-bar').style.width = pct + '%';
     if (diff <= 0) clearInterval(countdownInterval);
   }
 
@@ -953,46 +1080,31 @@ function startCountdown(expDate) {
 }
 
 // ══════════════════════════════════════════════════
-//  COPY HELPERS (อัปเดตให้รองรับ iFrame & Browser เก่า)
+//  COPY HELPERS
 // ══════════════════════════════════════════════════
-function fallbackCopyTextToClipboard(text) {
-  var textArea = document.createElement("textarea");
-  textArea.value = text;
-  textArea.style.top = "0";
-  textArea.style.left = "0";
-  textArea.style.position = "fixed";
-  document.body.appendChild(textArea);
-  textArea.focus();
-  textArea.select();
-  try {
-    document.execCommand('copy');
-  } catch (err) {}
-  document.body.removeChild(textArea);
-}
-
-function doCopy(text, btnId) {
-  if (!navigator.clipboard) {
-    fallbackCopyTextToClipboard(text);
-  } else {
-    navigator.clipboard.writeText(text).catch(() => {
-      fallbackCopyTextToClipboard(text);
-    });
-  }
-  
-  const btn = document.getElementById(btnId);
-  const originalHTML = btn.innerHTML;
-  btn.innerHTML = '✓';
-  btn.classList.add('copied');
-  setTimeout(() => { btn.innerHTML = originalHTML; btn.classList.remove('copied'); }, 1500);
-}
-
 function copyKey() {
-  doCopy(document.getElementById('result-key').textContent, 'copy-key-btn');
+  const key = document.getElementById('result-key').textContent;
+  navigator.clipboard.writeText(key).catch(() => {});
+  const btn = document.getElementById('copy-key-btn');
+  btn.textContent = '✅';
+  btn.classList.add('copied');
+  setTimeout(() => { btn.textContent = '📋'; btn.classList.remove('copied'); }, 1400);
 }
 
 function copyReturnKey() {
-  doCopy(document.getElementById('return-key-val').textContent, 'copy-return-btn');
+  const key = document.getElementById('return-key-val').textContent;
+  navigator.clipboard.writeText(key).catch(() => {});
 }
+
+// ══════════════════════════════════════════════════
+//  FOOTER CLOCK
+// ══════════════════════════════════════════════════
+function updateClock() {
+  document.getElementById('footer-time').textContent =
+    new Date().toLocaleString('th-TH');
+}
+updateClock();
+setInterval(updateClock, 1000);
 </script>
 </body>
 </html>
