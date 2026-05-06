@@ -1,697 +1,998 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" style="color-scheme: dark;">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>ProBreakout EA — Live Dashboard</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WexZ Hub — Key System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    /* Monochrome Palette */
-    --bg:       #000000;
-    --surface:  #0a0a0a;
-    --surface-alt:#111111;
-    --border:   #2a2a2a;
-    --border-hover: #4a4a4a;
-    --text:     #ffffff;
-    --muted:    #777777;
-    --dimmed:   #444444;
-    
-    /* Semantic B&W */
-    --accent:   #ffffff;
-    --accent-inv: #000000;
-    --win:      #ffffff;
-    --loss:     #666666;
-    --open:     #aaaaaa;
-    
-    /* Typography */
-    --mono:     'Space Mono', monospace;
-    --sans:     'Syne', sans-serif;
-  }
+/* ─── RESET & VARIABLES ─────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--mono);
-    min-height: 100vh;
-    overflow-x: hidden;
-    line-height: 1.5;
-  }
-
-  /* ─── DOT NOISE OVERLAY ─── */
-  body::before {
-    content: '';
-    position: fixed; inset: 0;
-    background-image: radial-gradient(var(--border) 1px, transparent 1px);
-    background-size: 24px 24px;
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0.4;
-  }
-
-  /* ─── LAYOUT ─── */
-  .shell { position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; padding: 32px 20px; }
-
-  /* ─── HEADER ─── */
-  header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding-bottom: 24px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 32px;
-  }
-  .logo { display: flex; align-items: baseline; gap: 12px; }
-  .logo-title {
-    font-family: var(--sans); font-weight: 800; font-size: 24px;
-    color: var(--text); letter-spacing: -0.5px;
-    text-transform: uppercase;
-  }
-  .logo-badge {
-    font-size: 10px; font-family: var(--mono); letter-spacing: 2px;
-    color: var(--bg); background: var(--text);
-    padding: 3px 8px; border-radius: 2px; font-weight: 700;
-  }
-  .header-right { display: flex; align-items: center; gap: 16px; }
-  .live-indicator {
-    display: flex; align-items: center; gap: 8px;
-    border: 1px solid var(--border);
-    padding: 6px 12px; border-radius: 20px;
-    background: var(--surface);
-  }
-  .live-dot {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: var(--muted);
-  }
-  .live-dot.active {
-    background: var(--accent);
-    animation: pulse 2s ease-in-out infinite;
-  }
-  @keyframes pulse {
-    0%,100% { opacity: 1; box-shadow: 0 0 0 0 rgba(255,255,255,.4); }
-    50% { opacity: .5; box-shadow: 0 0 0 4px rgba(255,255,255,0); }
-  }
-  .live-text { font-size: 10px; letter-spacing: 2px; color: var(--text); font-weight: 700; }
-  .last-update { font-size: 11px; color: var(--muted); }
-
-  /* ─── CONFIG BAR ─── */
-  .config-bar {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 20px;
-    display: flex; gap: 16px; align-items: flex-end;
-    margin-bottom: 32px;
-    flex-wrap: wrap;
-  }
-  .config-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 220px; }
-  .config-label { font-size: 10px; letter-spacing: 2px; color: var(--muted); font-weight: 700; }
-  .config-input {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: var(--mono);
-    font-size: 12px;
-    padding: 10px 12px;
-    border-radius: 2px;
-    outline: none;
-    transition: all .2s;
-    width: 100%;
-  }
-  .config-input:focus { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
-  .connect-btn {
-    background: var(--accent); color: var(--accent-inv);
-    font-family: var(--mono); font-weight: 700;
-    font-size: 12px; letter-spacing: 1px;
-    border: 1px solid var(--accent); padding: 10px 24px;
-    border-radius: 2px; cursor: pointer;
-    transition: all .2s;
-    white-space: nowrap;
-    align-self: flex-end;
-  }
-  .connect-btn:hover { background: transparent; color: var(--accent); }
-  .connect-btn:active { transform: translateY(1px); }
-
-  /* ─── SQL SETUP ─── */
-  .sql-box {
-    background: var(--surface-alt);
-    border: 1px solid var(--border);
-    border-left: 4px solid var(--muted);
-    border-radius: 4px;
-    padding: 16px 20px;
-    margin-bottom: 32px;
-    font-size: 11px;
-  }
-  .sql-title { color: var(--text); font-weight: 700; letter-spacing: 2px; margin-bottom: 12px; font-size: 11px; }
-  .sql-code { color: #cccccc; line-height: 1.8; white-space: pre-wrap; font-size: 11px; }
-  .sql-code .kw { color: #ffffff; font-weight: 700; }
-  .sql-code .ty { color: #aaaaaa; }
-  .sql-code .cm { color: var(--dimmed); font-style: italic; }
-  .sql-toggle { color: var(--muted); cursor: pointer; font-size: 10px; letter-spacing: 1px; transition: color 0.2s; }
-  .sql-toggle:hover { color: var(--text); }
-
-  /* ─── STAT CARDS ─── */
-  .stats-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; margin-bottom: 32px; }
-  .stat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 20px;
-    position: relative;
-    transition: all .2s;
-  }
-  .stat-card:hover { border-color: var(--border-hover); background: var(--surface-alt); transform: translateY(-2px); }
-  .stat-label { font-size: 10px; letter-spacing: 2px; color: var(--muted); margin-bottom: 12px; font-weight: 700;}
-  .stat-value { font-family: var(--sans); font-weight: 800; font-size: 28px; color: var(--text); letter-spacing: -1px; }
-  .stat-sub { font-size: 10px; color: var(--muted); margin-top: 6px; letter-spacing: 1px;}
-
-  /* ─── TABLE ─── */
-  .section-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 16px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--border);
-  }
-  .section-title { font-family: var(--sans); font-weight: 800; font-size: 16px; color: var(--text); letter-spacing: 1px; text-transform: uppercase;}
-  .filter-tabs { display: flex; gap: 6px; }
-  .filter-tab {
-    font-family: var(--mono); font-size: 10px; letter-spacing: 1px;
-    padding: 6px 14px; border-radius: 2px;
-    border: 1px solid var(--border);
-    color: var(--muted); background: var(--bg); cursor: pointer;
-    transition: all .2s;
-    font-weight: 700;
-  }
-  .filter-tab.active { background: var(--text); color: var(--bg); border-color: var(--text); }
-  .filter-tab:hover:not(.active) { border-color: var(--muted); color: var(--text); }
-
-  .table-wrap {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    overflow: hidden;
-    margin-bottom: 32px;
-  }
-  table { width: 100%; border-collapse: collapse; }
-  thead th {
-    background: var(--surface-alt);
-    text-align: left; font-size: 10px; letter-spacing: 2px;
-    color: var(--muted); font-weight: 700;
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-  }
-  tbody tr {
-    border-bottom: 1px solid var(--border);
-    transition: background .15s;
-  }
-  tbody tr:last-child { border-bottom: none; }
-  tbody tr:hover { background: var(--surface-alt); }
-  tbody td { padding: 12px 16px; font-size: 12px; }
-
-  /* B&W Badges */
-  .badge {
-    display: inline-flex; align-items: center; justify-content: center;
-    font-size: 10px; font-weight: 700; letter-spacing: 1px;
-    padding: 4px 10px; border-radius: 2px; min-width: 50px;
-    text-transform: uppercase;
-  }
-  .badge-win  { background: var(--text); color: var(--bg); }
-  .badge-loss { background: transparent; color: var(--loss); border: 1px solid var(--loss); }
-  .badge-open { background: transparent; color: var(--open); border: 1px dashed var(--open); }
-  .badge-buy  { background: transparent; color: var(--text); border: 1px solid var(--text); }
-  .badge-sell { background: var(--surface-alt); color: var(--muted); border: 1px solid var(--muted); }
-
-  /* B&W Profit Indicators */
-  .profit-pos { color: var(--win); font-weight: 700; }
-  .profit-neg { color: var(--loss); }
-  .muted-val  { color: var(--muted); }
-
-  /* ─── EMPTY / LOADING ─── */
-  .empty-state {
-    text-align: center; padding: 60px 20px;
-    color: var(--muted); font-size: 12px; letter-spacing: 1px;
-  }
-  .empty-icon { font-size: 24px; margin-bottom: 16px; color: var(--dimmed); }
+:root {
+  /* Tech Dashboard Palette */
+  --bg-dark:      #030305;
+  --bg-panel:     #0a0a0f;
+  --bg-card:      #12121a;
+  --bg-card-hover:#1a1a24;
   
-  /* ─── EQUITY CHART ─── */
-  .chart-wrap {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 24px;
-    margin-bottom: 32px;
-  }
-  .chart-title { font-size: 11px; font-weight: 700; letter-spacing: 2px; color: var(--text); margin-bottom: 20px; display: flex; align-items: center; gap: 8px;}
-  .chart-title::before { content: ''; display: block; width: 8px; height: 8px; background: var(--text); }
-  canvas { width: 100% !important; display: block; }
-
-  /* ─── STATUS LOG ─── */
-  .log-wrap {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 16px 20px;
-    max-height: 240px;
-    overflow-y: auto;
-    font-family: var(--mono);
-  }
-  .log-wrap::-webkit-scrollbar { width: 6px; }
-  .log-wrap::-webkit-scrollbar-track { background: var(--bg); }
-  .log-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-  .log-wrap::-webkit-scrollbar-thumb:hover { background: var(--muted); }
-  .log-entry { font-size: 11px; padding: 8px 0; border-bottom: 1px solid var(--border); display: flex; gap: 16px; }
-  .log-entry:last-child { border-bottom: none; }
-  .log-time { color: var(--muted); min-width: 150px; }
-  .log-msg  { color: var(--text); }
+  --border:       #1f1f2e;
+  --border-focus: #33334d;
   
-  /* B&W Status levels */
-  .log-msg.ok   { color: var(--text); }
-  .log-msg.warn { color: var(--open); font-style: italic; }
-  .log-msg.err  { color: var(--loss); text-decoration: line-through; }
+  --text-main:    #ffffff;
+  --text-muted:   #8a8a9e;
+  
+  --accent-cyan:  #00e5ff;
+  --accent-cyan-dim: rgba(0, 229, 255, 0.1);
+  
+  --accent-gold:  #ffaa00;
+  --accent-gold-dim: rgba(255, 170, 0, 0.1);
+  
+  --accent-green: #00ff88;
+  --accent-red:   #ff3366;
+  
+  --font-sans:    'Outfit', sans-serif;
+  --font-mono:    'Space Mono', monospace;
+  --radius-sm:    6px;
+  --radius-md:    12px;
+  --radius-lg:    20px;
+}
 
-  /* ─── RESPONSIVE ─── */
-  @media(max-width:768px) {
-    .config-bar { flex-direction: column; align-items: stretch; }
-    .connect-btn { align-self: stretch; }
-    .stats-row { grid-template-columns: repeat(2, 1fr); }
-    thead th:nth-child(n+5), tbody td:nth-child(n+5) { display: none; }
-    .shell { padding: 16px; }
+html, body {
+  min-height: 100vh;
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+/* ─── LAYOUT: SPLIT SCREEN ──────────────────── */
+.layout-wrapper {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: row;
+}
+
+/* ─── LEFT PANEL (BRANDING) ─────────────────── */
+.left-panel {
+  width: 400px;
+  background: var(--bg-panel);
+  border-right: 1px solid var(--border);
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  z-index: 10;
+}
+
+/* Tech Grid Background in Left Panel */
+.left-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-size: 30px 30px;
+  background-image: 
+    linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
+  mask-image: linear-gradient(to bottom, black 30%, transparent 90%);
+  z-index: -1;
+}
+
+/* Glowing Orb in Left Panel */
+.glow-orb {
+  position: absolute;
+  top: -100px;
+  left: -100px;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(0,229,255,0.15) 0%, transparent 70%);
+  filter: blur(40px);
+  z-index: -1;
+}
+
+.brand-wrapper { margin-top: auto; margin-bottom: auto; }
+.brand-logo {
+  font-size: 42px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  margin-bottom: 8px;
+}
+.brand-logo span { color: var(--accent-cyan); }
+.brand-sub {
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.status-widget {
+  margin-top: auto;
+  padding: 16px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.status-indicator {
+  position: relative;
+  width: 10px; height: 10px;
+  background: var(--accent-green);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--accent-green);
+}
+.status-indicator::after {
+  content: ''; position: absolute; top: -4px; left: -4px; right: -4px; bottom: -4px;
+  border: 1px solid var(--accent-green); border-radius: 50%;
+  animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+@keyframes ping {
+  75%, 100% { transform: scale(2); opacity: 0; }
+}
+.status-text { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); }
+.status-text strong { color: var(--text-main); font-size: 13px; display: block; }
+
+/* ─── RIGHT PANEL (CONTENT) ─────────────────── */
+.right-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  position: relative;
+}
+
+.content-container {
+  width: 100%;
+  max-width: 540px;
+  position: relative;
+}
+
+/* ─── PAGE TRANSITIONS ──────────────────────── */
+.page { display: none; opacity: 0; }
+.page.active { 
+  display: block; 
+  animation: slideLeft 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
+}
+@keyframes slideLeft {
+  from { opacity: 0; transform: translateX(40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ─── HEADERS & LABELS ──────────────────────── */
+.page-header { margin-bottom: 32px; }
+.page-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: flex; align-items: center; gap: 12px;
+}
+.page-desc { color: var(--text-muted); font-size: 15px; }
+
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 12px;
+}
+
+/* ─── HORIZONTAL CARDS ──────────────────────── */
+.list-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+.list-card::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  background: transparent; transition: background 0.2s;
+}
+.list-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-focus);
+  transform: translateX(4px);
+}
+
+.list-icon {
+  width: 48px; height: 48px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+}
+.list-info { flex: 1; }
+.list-title { font-weight: 600; font-size: 16px; color: var(--text-main); margin-bottom: 2px; }
+.list-desc { font-size: 13px; color: var(--text-muted); }
+.list-action {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 4px;
+}
+
+/* Card Variations */
+.list-card.free:hover::before { background: var(--accent-cyan); }
+.list-card.free .list-action { color: var(--accent-cyan); background: var(--accent-cyan-dim); }
+
+.list-card.premium:hover::before { background: var(--accent-gold); }
+.list-card.premium .list-action { color: var(--accent-gold); background: var(--accent-gold-dim); }
+
+/* ─── BUTTONS ────────────────────────────────── */
+.btn {
+  width: 100%;
+  padding: 16px 24px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-primary { background: var(--text-main); color: var(--bg-dark); }
+.btn-primary:hover { background: #e0e0e0; transform: translateY(-2px); }
+
+.btn-cyan { background: var(--accent-cyan); color: var(--bg-dark); box-shadow: 0 4px 15px var(--accent-cyan-dim); }
+.btn-cyan:hover { background: #33eeff; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,229,255,0.3); }
+
+.btn-outline { background: transparent; color: var(--text-main); border: 1px solid var(--border); }
+.btn-outline:hover { background: rgba(255,255,255,0.03); border-color: var(--border-focus); }
+
+.btn-ghost { background: transparent; color: var(--text-muted); font-size: 14px; padding: 8px 0; width: auto; display: inline-flex; align-items: center; gap: 6px; }
+.btn-ghost:hover { color: var(--text-main); }
+
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+/* ─── INPUTS ─────────────────────────────────── */
+.input-group { margin-bottom: 24px; }
+.input-label {
+  display: block; font-family: var(--font-mono); font-size: 11px;
+  color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase;
+}
+.input-field {
+  width: 100%;
+  padding: 18px 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--accent-cyan);
+  font-family: var(--font-mono);
+  font-size: 15px;
+  outline: none;
+  transition: all 0.2s;
+}
+.input-field:focus {
+  border-color: var(--accent-cyan);
+  background: rgba(0,229,255,0.02);
+  box-shadow: inset 4px 0 0 var(--accent-cyan);
+}
+.input-field::placeholder { color: #444; }
+
+/* ─── PROGRESS BAR (Instead of Steps) ────────── */
+.progress-container {
+  display: flex; gap: 8px; margin-bottom: 32px;
+}
+.progress-bar {
+  flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden;
+}
+.progress-fill {
+  height: 100%; background: var(--accent-cyan); width: 0%; transition: width 0.4s ease;
+}
+.progress-fill.full { width: 100%; }
+
+/* ─── KEY DISPLAY BOX ────────────────────────── */
+.key-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border-focus);
+  border-radius: var(--radius-sm);
+  padding: 6px;
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 24px;
+}
+.key-value {
+  flex: 1;
+  padding: 12px 16px;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  color: var(--accent-cyan);
+  word-break: break-all;
+}
+.key-copy {
+  width: 48px; height: 48px;
+  background: var(--border);
+  border: none; border-radius: 4px;
+  color: var(--text-main); font-size: 18px; cursor: pointer;
+  transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center;
+}
+.key-copy:hover { background: var(--border-focus); color: var(--accent-cyan); }
+.key-copy.copied { background: var(--accent-cyan); color: var(--bg-dark); }
+
+/* ─── ALERTS & INFO ──────────────────────────── */
+.alert {
+  padding: 16px 20px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  margin-bottom: 24px;
+  display: flex; align-items: flex-start; gap: 12px;
+  border-left: 3px solid;
+}
+.alert-info { background: rgba(255,255,255,0.03); border-color: var(--text-muted); color: var(--text-muted); }
+.alert-success { background: var(--accent-cyan-dim); border-color: var(--accent-cyan); color: var(--accent-cyan); }
+.alert-warn { background: var(--accent-gold-dim); border-color: var(--accent-gold); color: var(--accent-gold); }
+.alert-error { background: rgba(255,51,102,0.1); border-color: var(--accent-red); color: var(--accent-red); }
+
+.info-list { margin-bottom: 24px; }
+.info-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 12px 0; border-bottom: 1px solid var(--border);
+}
+.info-item:last-child { border-bottom: none; }
+.info-item .num { 
+  font-family: var(--font-mono); font-size: 12px; color: var(--bg-dark); background: var(--text-muted);
+  width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 4px; flex-shrink: 0; margin-top: 2px;
+}
+.info-item .text { font-size: 14px; color: var(--text-muted); }
+.info-item .text strong { color: var(--text-main); }
+
+/* ─── TIMER DIGITS ───────────────────────────── */
+.timer-hero {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+
+/* ─── SPINNER ────────────────────────────────── */
+.spinner {
+  display: inline-block; width: 16px; height: 16px;
+  border: 2px solid rgba(0,0,0,0.2); border-top-color: currentColor;
+  border-radius: 50%; animation: spin 0.6s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── RESPONSIVE ─────────────────────────────── */
+@media (max-width: 900px) {
+  .layout-wrapper { flex-direction: column; }
+  .left-panel {
+    width: 100%; padding: 24px; border-right: none; border-bottom: 1px solid var(--border);
+    flex-direction: row; align-items: center; justify-content: space-between;
   }
+  .brand-wrapper { margin: 0; }
+  .brand-logo { font-size: 24px; margin-bottom: 2px; }
+  .brand-sub { font-size: 10px; }
+  .status-widget { margin: 0; padding: 8px 12px; }
+  .status-text strong { font-size: 11px; display: inline; margin-left: 4px; }
+  .right-panel { padding: 24px 16px; align-items: flex-start; }
+  .glow-orb { display: none; }
+}
 </style>
 </head>
 <body>
-<div class="shell">
 
-  <!-- HEADER -->
-  <header>
-    <div class="logo">
-      <span class="logo-title">ProBreakout EA</span>
-      <span class="logo-badge">XAUUSD</span>
+<div class="layout-wrapper">
+  
+  <!-- ════════ LEFT PANEL ════════ -->
+  <aside class="left-panel">
+    <div class="glow-orb"></div>
+    <div class="brand-wrapper">
+      <div class="brand-logo">WEXZ<span>.</span>HUB</div>
+      <div class="brand-sub">Advanced Key System</div>
     </div>
-    <div class="header-right">
-      <span class="last-update" id="lastUpdate">—</span>
-      <div class="live-indicator">
-        <div class="live-dot" id="liveDot"></div>
-        <span class="live-text" id="liveText">OFFLINE</span>
+    
+    <div class="status-widget">
+      <div class="status-indicator"></div>
+      <div class="status-text">
+        SYSTEM STATUS
+        <strong>OPERATIONAL</strong>
       </div>
     </div>
-  </header>
+  </aside>
 
-  <!-- CONFIG -->
-  <div class="config-bar">
-    <div class="config-group">
-      <label class="config-label">SUPABASE URL</label>
-      <input class="config-input" id="cfgUrl" placeholder="https://xxxx.supabase.co" spellcheck="false"/>
-    </div>
-    <div class="config-group">
-      <label class="config-label">ANON KEY</label>
-      <input class="config-input" id="cfgKey" type="password" placeholder="eyJhbGciOiJ..." spellcheck="false"/>
-    </div>
-    <div class="config-group" style="max-width:140px; min-width: 100px;">
-      <label class="config-label">REFRESH</label>
-      <select class="config-input" id="cfgInterval">
-        <option value="5000">5 SEC</option>
-        <option value="10000" selected>10 SEC</option>
-        <option value="30000">30 SEC</option>
-        <option value="0">OFF</option>
-      </select>
-    </div>
-    <button class="connect-btn" onclick="connect()">CONNECT DB</button>
-  </div>
+  <!-- ════════ RIGHT PANEL ════════ -->
+  <main class="right-panel">
+    <div class="content-container">
 
-  <!-- SQL SETUP -->
-  <div class="sql-box">
-    <div style="display:flex;justify-content:space-between;align-items:center; margin-bottom: 8px;">
-      <div class="sql-title">SUPABASE SQL SCHEMA (FIRST TIME SETUP)</div>
-      <span class="sql-toggle" onclick="toggleSql()">[ SHOW / HIDE ]</span>
-    </div>
-    <pre id="sqlBlock" style="display:none" class="sql-code"><span class="cm">-- Table 1: บันทึก Trade ทุกรายการ</span>
-<span class="kw">create table</span> trades (
-  id          <span class="ty">bigserial primary key</span>,
-  magic       <span class="ty">int</span>,
-  symbol      <span class="ty">text</span>,
-  direction   <span class="ty">text</span>,
-  open_price  <span class="ty">float8</span>,
-  sl          <span class="ty">float8</span>,
-  tp          <span class="ty">float8</span>,
-  lot         <span class="ty">float8</span>,
-  profit      <span class="ty">float8 default 0</span>,
-  status      <span class="ty">text default 'OPEN'</span>,
-  ticket      <span class="ty">bigint</span>,
-  server_time <span class="ty">text</span>,
-  close_time  <span class="ty">text</span>,
-  created_at  <span class="ty">timestamptz default now()</span>
-);
-<span class="kw">alter table</span> trades <span class="kw">enable row level security</span>;
-<span class="kw">create policy</span> "anon read" <span class="kw">on</span> trades <span class="kw">for select using</span> (<span class="ty">true</span>);
-<span class="kw">create policy</span> "anon insert" <span class="kw">on</span> trades <span class="kw">for insert with check</span> (<span class="ty">true</span>);
-<span class="kw">create policy</span> "anon update" <span class="kw">on</span> trades <span class="kw">for update using</span> (<span class="ty">true</span>);
+      <!-- ════════ PAGE 0: DASHBOARD ════════ -->
+      <div class="page active" id="page-choose">
+        <div class="page-header">
+          <div class="page-title">Select License Type</div>
+          <div class="page-desc">เลือกระบบคีย์ที่ต้องการใช้งานสำหรับสคริปต์</div>
+        </div>
 
-<span class="cm">-- Table 2: บันทึก EA Status / Circuit Breaker</span>
-<span class="kw">create table</span> ea_status (
-  id          <span class="ty">bigserial primary key</span>,
-  magic       <span class="ty">int</span>,
-  symbol      <span class="ty">text</span>,
-  status_msg  <span class="ty">text</span>,
-  balance     <span class="ty">float8</span>,
-  equity      <span class="ty">float8</span>,
-  consec_loss <span class="ty">int</span>,
-  logged_at   <span class="ty">text</span>,
-  created_at  <span class="ty">timestamptz default now()</span>
-);
-<span class="kw">alter table</span> ea_status <span class="kw">enable row level security</span>;
-<span class="kw">create policy</span> "anon all" <span class="kw">on</span> ea_status <span class="kw">for all using</span> (<span class="ty">true</span>) <span class="kw">with check</span> (<span class="ty">true</span>);</pre>
-  </div>
+        <div class="section-label">Available Plans</div>
+        
+        <!-- Standard Card -->
+        <div class="list-card free" onclick="selectPlan('free')">
+          <div class="list-icon">⚡</div>
+          <div class="list-info">
+            <div class="list-title">Standard Access</div>
+            <div class="list-desc">ใช้งานฟรี 24 ชั่วโมง (ทำ 1 Task)</div>
+          </div>
+          <div class="list-action">FREE</div>
+        </div>
 
-  <!-- STAT CARDS -->
-  <div class="stats-row" id="statsRow">
-    <div class="stat-card">
-      <div class="stat-label">TOTAL TRADES</div>
-      <div class="stat-value" id="s-total">—</div>
-      <div class="stat-sub" id="s-open">— OPEN</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">WIN RATE</div>
-      <div class="stat-value" id="s-wr">—</div>
-      <div class="stat-sub" id="s-wl">— W / — L</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">NET PROFIT</div>
-      <div class="stat-value" id="s-pnl">—</div>
-      <div class="stat-sub" id="s-avg">AVG PER TRADE</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">MAX LOSS STREAK</div>
-      <div class="stat-value" id="s-streak">—</div>
-      <div class="stat-sub">CONSECUTIVE</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">BEST TRADE</div>
-      <div class="stat-value profit-pos" id="s-best">—</div>
-      <div class="stat-sub">SINGLE TRADE</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">WORST TRADE</div>
-      <div class="stat-value profit-neg" id="s-worst">—</div>
-      <div class="stat-sub">SINGLE TRADE</div>
-    </div>
-  </div>
+        <!-- Premium Card -->
+        <div class="list-card premium" onclick="selectPlan('premium')">
+          <div class="list-icon">👑</div>
+          <div class="list-info">
+            <div class="list-title">Premium Lifetime</div>
+            <div class="list-desc">ไม่ต้องทำ Task ใช้งานได้ถาวร</div>
+          </div>
+          <div class="list-action">BUY</div>
+        </div>
 
-  <!-- EQUITY CURVE -->
-  <div class="chart-wrap">
-    <div class="chart-title">CUMULATIVE P&L CURVE</div>
-    <canvas id="equityChart" height="120"></canvas>
-  </div>
+        <div class="section-label" style="margin-top: 32px;">Existing Users</div>
+        <button class="btn btn-outline" onclick="goTo('page-return')">
+          Manage License / Check Status →
+        </button>
+      </div>
 
-  <!-- TRADES TABLE -->
-  <div class="section-header">
-    <div class="section-title">TRADE HISTORY</div>
-    <div class="filter-tabs">
-      <button class="filter-tab active" onclick="setFilter('ALL',this)">ALL</button>
-      <button class="filter-tab" onclick="setFilter('OPEN',this)">OPEN</button>
-      <button class="filter-tab" onclick="setFilter('WIN',this)">WIN</button>
-      <button class="filter-tab" onclick="setFilter('LOSS',this)">LOSS</button>
+      <!-- ════════ PAGE 1: TASK ════════ -->
+      <div class="page" id="page-task">
+        <button class="btn-ghost" onclick="goTo('page-choose')">← Return</button>
+        
+        <div class="progress-container" style="margin-top: 20px;">
+          <div class="progress-bar"><div class="progress-fill full"></div></div>
+          <div class="progress-bar"><div class="progress-fill"></div></div>
+          <div class="progress-bar"><div class="progress-fill"></div></div>
+        </div>
+
+        <div class="page-header">
+          <div class="page-title">Task Verification</div>
+          <div class="page-desc">ทำภารกิจเพื่อยืนยันตัวตนและรับคีย์</div>
+        </div>
+
+        <!-- Task Item -->
+        <div class="list-card" id="task-box-1" onclick="completeTask(1)" style="border-left: 3px solid var(--border-focus);">
+          <div class="list-icon" style="background: var(--bg-dark);" id="task-num-1">1</div>
+          <div class="list-info">
+            <div class="list-title">Visit Sponsor Link</div>
+            <div class="list-desc">เข้าชมเว็บไซต์และรอ 15 วินาที</div>
+          </div>
+          <div class="list-action" id="task-status-1" style="background: var(--border-focus); color: var(--text-main);">START</div>
+        </div>
+
+        <div class="alert alert-info" id="task-alert">
+          กรุณากดเริ่ม Task ด้านบนเพื่อปลดล็อคขั้นตอนถัดไป
+        </div>
+
+        <button class="btn btn-primary" id="btn-gen" onclick="goToGenerate()" disabled>
+          Continue to Verification
+        </button>
+      </div>
+
+      <!-- ════════ PAGE 2: HWID ════════ -->
+      <div class="page" id="page-generate">
+        <button class="btn-ghost" onclick="goTo('page-task')">← Back to Tasks</button>
+
+        <div class="progress-container" style="margin-top: 20px;">
+          <div class="progress-bar"><div class="progress-fill full"></div></div>
+          <div class="progress-bar"><div class="progress-fill full"></div></div>
+          <div class="progress-bar"><div class="progress-fill"></div></div>
+        </div>
+
+        <div class="page-header">
+          <div class="page-title">Hardware Binding</div>
+          <div class="page-desc">ป้อน Hardware ID เพื่อผูกมัดกับคีย์นี้</div>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">Terminal / Console HWID</label>
+          <input class="input-field" id="hwid-input" type="text"
+            placeholder="WEXZ-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false">
+        </div>
+
+        <div id="gen-alert"></div>
+
+        <button class="btn btn-cyan" id="btn-create-key" onclick="createFreeKey()">
+          Generate License
+        </button>
+      </div>
+
+      <!-- ════════ PAGE 3: KEY RESULT ════════ -->
+      <div class="page" id="page-key">
+        <div class="progress-container" style="margin-top: 20px;">
+          <div class="progress-bar"><div class="progress-fill full"></div></div>
+          <div class="progress-bar"><div class="progress-fill full"></div></div>
+          <div class="progress-bar"><div class="progress-fill full" style="background: var(--accent-green);"></div></div>
+        </div>
+
+        <div class="page-header">
+          <div class="page-title" style="color: var(--accent-green);">Generation Successful</div>
+          <div class="page-desc">คัดลอกคีย์ด้านล่างเพื่อนำไปใช้งานในสคริปต์</div>
+        </div>
+
+        <div class="section-label">License Key</div>
+        <div class="key-box">
+          <div class="key-value" id="result-key">—</div>
+          <button class="key-copy" id="copy-key-btn" onclick="copyKey()">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+          </button>
+        </div>
+
+        <div id="key-type-badge" class="alert alert-success"></div>
+
+        <div id="timer-section" style="display:none; margin: 32px 0;">
+          <div class="section-label" style="text-align: center;">Time Remaining</div>
+          <div class="timer-hero" id="countdown">23:59:59</div>
+        </div>
+
+        <button class="btn btn-outline" onclick="goTo('page-choose')">
+          Return to Dashboard
+        </button>
+      </div>
+
+      <!-- ════════ PAGE 4: RETURN / CHECK ════════ -->
+      <div class="page" id="page-return">
+        <button class="btn-ghost" onclick="goTo('page-choose')">← Return</button>
+
+        <div class="page-header" style="margin-top: 20px;">
+          <div class="page-title">License Manager</div>
+          <div class="page-desc">ตรวจสอบคีย์เดิมหรือดูสถานะการใช้งาน</div>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label">Enter HWID</label>
+          <input class="input-field" id="return-hwid" type="text"
+            placeholder="WEXZ-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false">
+        </div>
+
+        <div id="return-alert"></div>
+
+        <button class="btn btn-primary" onclick="checkExistingKey()">
+          Check Database
+        </button>
+
+        <!-- ผลการตรวจสอบ -->
+        <div id="return-result" style="display:none; margin-top:32px">
+          <div class="section-label">Found License</div>
+          <div class="key-box">
+            <div class="key-value" id="return-key-val" style="font-size: 13px;">—</div>
+            <button class="key-copy" id="copy-return-btn" onclick="copyReturnKey()">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </button>
+          </div>
+
+          <div id="return-status-badge" class="alert"></div>
+
+          <div class="section-label">Available Actions</div>
+          <div class="list-card" id="opt-use-old" onclick="useOldKey()">
+            <div class="list-info">
+              <div class="list-title">Use Active Key</div>
+              <div class="list-desc">ใช้งานคีย์ที่ยังไม่หมดอายุต่อ</div>
+            </div>
+            <div class="list-action" style="background: rgba(255,255,255,0.05);">SELECT</div>
+          </div>
+          
+          <div class="list-card" id="opt-regen" onclick="regenKey()">
+            <div class="list-info">
+              <div class="list-title" style="color: var(--accent-cyan);">Generate New Key</div>
+              <div class="list-desc">รับคีย์ 24H ใหม่ (ต้องทำ Task)</div>
+            </div>
+            <div class="list-action" style="color: var(--accent-cyan); background: var(--accent-cyan-dim);">START</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════ PAGE 5: PREMIUM ════════ -->
+      <div class="page" id="page-premium">
+        <button class="btn-ghost" onclick="goTo('page-choose')">← Return</button>
+
+        <div class="page-header" style="margin-top: 20px;">
+          <div class="page-title" style="color: var(--accent-gold);">Premium Lifetime</div>
+          <div class="page-desc">ยกระดับการใช้งานแบบไม่มีข้อจำกัดและถาวร</div>
+        </div>
+
+        <div class="alert alert-warn" style="border-left-width: 4px;">
+          Premium Key จำเป็นต้องสั่งซื้อผ่านผู้ดูแลระบบ (Admin) โดยตรงเท่านั้น
+        </div>
+
+        <div class="info-list">
+          <div class="info-item">
+            <div class="num" style="background: var(--accent-gold);">1</div>
+            <div class="text"><strong>ถาวรไม่มีหมดอายุ</strong> — ลืมการทำ Task รายวันไปได้เลย</div>
+          </div>
+          <div class="info-item">
+            <div class="num" style="background: var(--accent-gold);">2</div>
+            <div class="text"><strong>ผูกติดกับเครื่อง (HWID Locked)</strong> — ปลอดภัยสำหรับคุณคนเดียว</div>
+          </div>
+          <div class="info-item">
+            <div class="num" style="background: var(--accent-gold);">3</div>
+            <div class="text"><strong>จัดการรวดเร็ว</strong> — แอดมินเพิ่มเข้าระบบฐานข้อมูลให้ทันที</div>
+          </div>
+        </div>
+
+        <button class="btn btn-outline" style="border-color: var(--accent-gold); color: var(--accent-gold);" onclick="alert('กรุณาติดต่อ Admin ทาง Discord หรือ Line!')">
+          Contact Admin to Purchase
+        </button>
+      </div>
+
     </div>
-  </div>
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>TIME</th>
-          <th>DIR</th>
-          <th>OPEN</th>
-          <th>SL</th>
-          <th>TP</th>
-          <th>LOT</th>
-          <th>PROFIT</th>
-          <th>STATUS</th>
-        </tr>
-      </thead>
-      <tbody id="tradeBody">
-        <tr><td colspan="8"><div class="empty-state"><div class="empty-icon">DATABASE DISCONNECTED</div>กรอก Supabase URL และ Key แล้วกด CONNECT DB</div></td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- EA STATUS LOG -->
-  <div class="section-header">
-    <div class="section-title">SYSTEM LOG</div>
-  </div>
-  <div class="log-wrap" id="statusLog">
-    <div class="log-entry">
-      <span class="log-time">—</span>
-      <span class="log-msg muted-val">รอการเชื่อมต่อฐานข้อมูล...</span>
-    </div>
-  </div>
-
-</div><!-- /shell -->
+  </main>
+</div>
 
 <script>
-// ─── STATE ───────────────────────────────────────────────
-let SB_URL = '', SB_KEY = '', allTrades = [], currentFilter = 'ALL';
-let refreshTimer = null, chart = null;
+// ══════════════════════════════════════════════════
+//  CONFIG — แก้ตรงนี้ให้ตรงกับ Supabase ของคุณ
+// ══════════════════════════════════════════════════
+const CONFIG = {
+  SUPABASE_URL    : "https://XXXXXXXXXXXXXXXX.supabase.co",   // ← ใส่ Project URL
+  SUPABASE_ANON   : "eyXXXXXXXXXXXXXXXXXXXX",               // ← ใส่ anon key
+  TASK_LINK       : "https://link-hub.net/XXXXXX",            // ← ใส่ลิงก์ task
+  TASK_WAIT_SEC   : 15,                                        // วินาทีรอก่อนนับว่าทำเสร็จ
+};
 
-// ─── INIT ─────────────────────────────────────────────────
-window.addEventListener('DOMContentLoaded', () => {
-  const saved = localStorage.getItem('pb_config');
-  if (saved) {
-    try {
-      const c = JSON.parse(saved);
-      document.getElementById('cfgUrl').value = c.url || '';
-      document.getElementById('cfgKey').value = c.key || '';
-    } catch(e) {}
-  }
-  initChart();
-});
+// ══════════════════════════════════════════════════
+//  SUPABASE HELPERS
+// ══════════════════════════════════════════════════
+const SB_HEADERS = {
+  "Content-Type" : "application/json",
+  "apikey"       : CONFIG.SUPABASE_ANON,
+  "Authorization": `Bearer ${CONFIG.SUPABASE_ANON}`,
+};
 
-function toggleSql() {
-  const el = document.getElementById('sqlBlock');
-  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+async function sb_get(table, filter) {
+  const url = `${CONFIG.SUPABASE_URL}/rest/v1/${table}?${filter}&select=*`;
+  const r = await fetch(url, { headers: SB_HEADERS });
+  return r.json();
 }
 
-// ─── CONNECT ──────────────────────────────────────────────
-function connect() {
-  SB_URL = document.getElementById('cfgUrl').value.trim().replace(/\/$/, '');
-  SB_KEY = document.getElementById('cfgKey').value.trim();
-  if (!SB_URL || !SB_KEY) { alert('กรุณากรอก URL และ Key ก่อน'); return; }
-  localStorage.setItem('pb_config', JSON.stringify({ url: SB_URL, key: SB_KEY }));
-  if (refreshTimer) clearInterval(refreshTimer);
-  fetchAll();
-  const ms = parseInt(document.getElementById('cfgInterval').value);
-  if (ms > 0) refreshTimer = setInterval(fetchAll, ms);
-}
-
-// ─── FETCH ────────────────────────────────────────────────
-async function sbFetch(endpoint) {
-  const res = await fetch(`${SB_URL}/rest/v1/${endpoint}`, {
-    headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` }
+async function sb_insert(table, body) {
+  const r = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/${table}`, {
+    method: "POST",
+    headers: { ...SB_HEADERS, "Prefer": "return=representation" },
+    body: JSON.stringify(body),
   });
-  if (!res.ok) {
-    const body = await res.text().catch(() => '(no body)');
-    throw new Error(`HTTP ${res.status} [${endpoint.split('?')[0]}] → ${body}`);
-  }
-  return res.json();
+  return r.json();
 }
 
-async function fetchAll() {
+async function sb_update(table, filter, body) {
+  const url = `${CONFIG.SUPABASE_URL}/rest/v1/${table}?${filter}`;
+  const r = await fetch(url, {
+    method: "PATCH",
+    headers: { ...SB_HEADERS, "Prefer": "return=representation" },
+    body: JSON.stringify(body),
+  });
+  return r.json();
+}
+
+async function sb_delete(table, filter) {
+  const url = `${CONFIG.SUPABASE_URL}/rest/v1/${table}?${filter}`;
+  await fetch(url, { method: "DELETE", headers: SB_HEADERS });
+}
+
+// ══════════════════════════════════════════════════
+//  KEY GENERATOR
+// ══════════════════════════════════════════════════
+function genKey() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const seg = n => Array.from({length:n}, ()=>chars[Math.floor(Math.random()*chars.length)]).join('');
+  return `WEXZ-${seg(4)}-${seg(4)}-${seg(4)}-${seg(4)}`;
+}
+
+// ══════════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════════
+function goTo(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const target = document.getElementById(pageId);
+  target.classList.add('active');
+}
+
+function selectPlan(plan) {
+  if (plan === 'free')    goTo('page-task');
+  if (plan === 'premium') goTo('page-premium');
+}
+
+// ══════════════════════════════════════════════════
+//  TASK FLOW
+// ══════════════════════════════════════════════════
+let taskDone = false;
+let taskTimer = null;
+
+function completeTask(n) {
+  const box    = document.getElementById(`task-box-${n}`);
+  const num    = document.getElementById(`task-num-${n}`);
+  const status = document.getElementById(`task-status-${n}`);
+
+  // open link
+  window.open(CONFIG.TASK_LINK, '_blank');
+
+  // start countdown
+  let sec = CONFIG.TASK_WAIT_SEC;
+  status.textContent = `WAIT ${sec}S`;
+  if (taskTimer) clearInterval(taskTimer);
+
+  taskTimer = setInterval(() => {
+    sec--;
+    status.textContent = `WAIT ${sec}S`;
+    if (sec <= 0) {
+      clearInterval(taskTimer);
+      box.style.borderLeftColor = 'var(--accent-cyan)';
+      num.textContent = '✓';
+      num.style.background = 'var(--accent-cyan)';
+      num.style.color = 'var(--bg-dark)';
+      status.textContent = 'DONE';
+      status.style.background = 'var(--accent-cyan-dim)';
+      status.style.color = 'var(--accent-cyan)';
+      taskDone = true;
+      document.getElementById('btn-gen').disabled = false;
+      document.getElementById('task-alert').className = 'alert alert-success';
+      document.getElementById('task-alert').innerHTML = 'Task สำเร็จ! กดปุ่ม <strong>Continue</strong> เพื่อไปต่อ';
+    }
+  }, 1000);
+}
+
+function goToGenerate() {
+  if (!taskDone) return;
+  goTo('page-generate');
+}
+
+// ══════════════════════════════════════════════════
+//  CREATE FREE KEY
+// ══════════════════════════════════════════════════
+async function createFreeKey() {
+  const hwid = document.getElementById('hwid-input').value.trim();
+  const alertEl = document.getElementById('gen-alert');
+  const btn = document.getElementById('btn-create-key');
+
+  if (!hwid || hwid.length < 8) {
+    alertEl.innerHTML = '<div class="alert alert-error">รูปแบบ HWID ไม่ถูกต้อง</div>';
+    return;
+  }
+
+  // loading state
+  btn.innerHTML = '<span class="spinner"></span> Generating...';
+  btn.disabled = true;
+  alertEl.innerHTML = '';
+
   try {
-    const [trades, statuses] = await Promise.all([
-      sbFetch('trades?select=*&order=created_at.desc&limit=200'),
-      sbFetch('ea_status?select=*&order=updated_at.desc&limit=50')
-    ]);
-    allTrades = trades;
-    setOnline(true);
-    renderStats(trades);
-    renderTable(trades);
-    renderEquityCurve(trades);
-    renderStatusLog(statuses);
-    document.getElementById('lastUpdate').textContent =
-      'LAST SYNC: ' + new Date().toLocaleTimeString('th-TH');
-  } catch(e) {
-    setOnline(false);
-    console.error(e);
-    addLogEntry('[SYS ERROR] ' + e.message, 'err');
+    // check if HWID already has a key
+    const existing = await sb_get('keys', `hwid=eq.${encodeURIComponent(hwid)}`);
+
+    if (existing && existing.length > 0) {
+      const row = existing[0];
+      const now = new Date();
+      const exp = new Date(row.expires_at);
+
+      if (row.is_permanent || exp > now) {
+        // key still valid
+        alertEl.innerHTML = `<div class="alert alert-warn">HWID นี้มีคีย์อยู่แล้วและยังไม่หมดอายุ โปรดเช็คที่เมนู Manage License</div>`;
+        btn.innerHTML = 'Generate License';
+        btn.disabled = false;
+        return;
+      }
+
+      // expired key — delete and regenerate
+      await sb_delete('keys', `hwid=eq.${encodeURIComponent(hwid)}`);
+    }
+
+    // create new key
+    const newKey    = genKey();
+    const now       = new Date();
+    const expiresAt = new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString();
+
+    await sb_insert('keys', {
+      key          : newKey,
+      hwid         : hwid,
+      is_permanent : false,
+      expires_at   : expiresAt,
+      created_at   : now.toISOString(),
+    });
+
+    // show result
+    showKeyResult(newKey, false, expiresAt);
+
+  } catch (e) {
+    alertEl.innerHTML = `<div class="alert alert-error">Error: ${e.message}</div>`;
+    btn.innerHTML = 'Generate License';
+    btn.disabled = false;
   }
 }
 
-function setOnline(ok) {
-  const dot = document.getElementById('liveDot');
-  if (ok) {
-      dot.classList.add('active');
+// ══════════════════════════════════════════════════
+//  CHECK EXISTING KEY
+// ══════════════════════════════════════════════════
+let returnKeyData = null;
+
+async function checkExistingKey() {
+  const hwid    = document.getElementById('return-hwid').value.trim();
+  const alertEl = document.getElementById('return-alert');
+  const result  = document.getElementById('return-result');
+
+  if (!hwid || hwid.length < 8) {
+    alertEl.innerHTML = '<div class="alert alert-error">รูปแบบ HWID ไม่ถูกต้อง</div>';
+    return;
+  }
+
+  alertEl.innerHTML = '<div class="alert alert-info"><span class="spinner"></span> Querying Database...</div>';
+  result.style.display = 'none';
+
+  try {
+    const rows = await sb_get('keys', `hwid=eq.${encodeURIComponent(hwid)}`);
+
+    if (!rows || rows.length === 0) {
+      alertEl.innerHTML = '<div class="alert alert-error">ไม่พบข้อมูล HWID นี้ในระบบ</div>';
+      return;
+    }
+
+    const row = rows[0];
+    const now = new Date();
+    const exp = row.expires_at ? new Date(row.expires_at) : null;
+    const isValid = row.is_permanent || (exp && exp > now);
+
+    returnKeyData = row;
+
+    document.getElementById('return-key-val').textContent = row.key;
+
+    const badge = document.getElementById('return-status-badge');
+    if (row.is_permanent) {
+      badge.className = 'alert alert-warn';
+      badge.innerHTML = 'สถานะ: <strong>Premium (ถาวร)</strong>';
+      document.getElementById('opt-regen').style.display = 'none';
+    } else if (isValid) {
+      const remaining = Math.floor((exp - now) / 1000);
+      const h = Math.floor(remaining/3600);
+      const m = Math.floor((remaining%3600)/60);
+      badge.className = 'alert alert-success';
+      badge.innerHTML = `สถานะ: <strong>Active</strong> (เหลือ ${h}h ${m}m)`;
+      document.getElementById('opt-regen').style.display = 'flex';
+    } else {
+      badge.className = 'alert alert-error';
+      badge.innerHTML = 'สถานะ: <strong>Expired (หมดอายุ)</strong>';
+      document.getElementById('opt-use-old').style.display = 'none';
+    }
+
+    alertEl.innerHTML = '';
+    result.style.display = 'block';
+
+  } catch (e) {
+    alertEl.innerHTML = `<div class="alert alert-error">Error: ${e.message}</div>`;
+  }
+}
+
+function useOldKey() {
+  if (!returnKeyData) return;
+  if (returnKeyData.is_permanent) {
+    showKeyResult(returnKeyData.key, true, null);
   } else {
-      dot.classList.remove('active');
-  }
-  document.getElementById('liveText').textContent = ok ? 'SYSTEM LIVE' : 'OFFLINE';
-}
-
-// ─── STATS ────────────────────────────────────────────────
-function renderStats(trades) {
-  const closed = trades.filter(t => t.result !== 'OPEN');
-  const wins   = closed.filter(t => t.result === 'WIN');
-  const losses = closed.filter(t => t.result === 'LOSS');
-  const opens  = trades.filter(t => t.result === 'OPEN');
-  const wr     = closed.length ? (wins.length / closed.length * 100).toFixed(1) : 0;
-  const net    = closed.reduce((s, t) => s + (t.profit || 0), 0);
-  const avg    = closed.length ? (net / closed.length).toFixed(2) : 0;
-  const profits= closed.map(t => t.profit || 0);
-  const best   = profits.length ? Math.max(...profits) : 0;
-  const worst  = profits.length ? Math.min(...profits) : 0;
-
-  // Max loss streak
-  let streak = 0, maxStreak = 0;
-  [...trades].reverse().forEach(t => {
-    if (t.result === 'LOSS') { streak++; maxStreak = Math.max(maxStreak, streak); }
-    else if (t.result === 'WIN') streak = 0;
-  });
-
-  document.getElementById('s-total').textContent = trades.length;
-  document.getElementById('s-open').textContent  = opens.length + ' OPEN';
-  document.getElementById('s-wr').textContent    = wr + '%';
-  document.getElementById('s-wl').textContent    = `${wins.length} W / ${losses.length} L`;
-  const pnlEl = document.getElementById('s-pnl');
-  pnlEl.textContent = (net >= 0 ? '+' : '') + net.toFixed(2);
-  pnlEl.className   = 'stat-value ' + (net >= 0 ? 'profit-pos' : 'profit-neg');
-  document.getElementById('s-avg').textContent   = (avg >= 0 ? '+' : '') + avg + ' AVG';
-  document.getElementById('s-streak').textContent= maxStreak;
-  document.getElementById('s-best').textContent  = '+' + best.toFixed(2);
-  document.getElementById('s-worst').textContent = worst.toFixed(2);
-}
-
-// ─── TABLE ────────────────────────────────────────────────
-function setFilter(f, btn) {
-  currentFilter = f;
-  document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderTable(allTrades);
-}
-
-function renderTable(trades) {
-  const filtered = currentFilter === 'ALL' ? trades : trades.filter(t => t.result === currentFilter);
-  const tbody = document.getElementById('tradeBody');
-  if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">NO RECORDS FOUND FOR THIS FILTER</div></td></tr>`;
-    return;
-  }
-  tbody.innerHTML = filtered.map(t => {
-    const pClass = (t.profit || 0) >= 0 ? 'profit-pos' : 'profit-neg';
-    const pSign  = (t.profit || 0) >= 0 ? '+' : '';
-    const dirBadge = `<span class="badge badge-${(t.direction||'').toLowerCase()}">${t.direction||'—'}</span>`;
-    const stBadge  = `<span class="badge badge-${(t.result||'open').toLowerCase()}">${t.result||'—'}</span>`;
-    const timeStr  = t.open_time ? t.open_time.replace('T',' ') : (t.created_at || '').substring(0,19);
-    return `<tr>
-      <td class="muted-val" style="font-size:11px">${timeStr}</td>
-      <td>${dirBadge}</td>
-      <td>${fmt(t.entry_price)}</td>
-      <td class="muted-val">${fmt(t.sl_price)}</td>
-      <td class="muted-val">${fmt(t.tp_price)}</td>
-      <td class="muted-val">${(t.lot_size||0).toFixed(2)}</td>
-      <td class="${pClass}">${t.result === 'OPEN' ? '—' : pSign + (t.profit||0).toFixed(2)}</td>
-      <td>${stBadge}</td>
-    </tr>`;
-  }).join('');
-}
-
-function fmt(v) { return v ? Number(v).toFixed(2) : '—'; }
-
-// ─── EQUITY CURVE (B&W Theme) ─────────────────────────────
-function initChart() {
-  const canvas = document.getElementById('equityChart');
-  const ctx = canvas.getContext('2d');
-  chart = { ctx, canvas };
-  drawChart([]);
-}
-
-function renderEquityCurve(trades) {
-  const closed = [...trades].filter(t => t.status !== 'OPEN')
-                             .sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
-  let cum = 0;
-  const points = [0, ...closed.map(t => { cum += (t.profit || 0); return cum; })];
-  drawChart(points);
-}
-
-function drawChart(points) {
-  const { ctx, canvas } = chart;
-  const W = canvas.offsetWidth || 800, H = 120;
-  canvas.width  = W * devicePixelRatio;
-  canvas.height = H * devicePixelRatio;
-  ctx.scale(devicePixelRatio, devicePixelRatio);
-
-  ctx.clearRect(0, 0, W, H);
-
-  if (points.length < 2) {
-    ctx.fillStyle = '#444444';
-    ctx.font = '11px Space Mono, monospace';
-    ctx.fillText('WAITING FOR CLOSED TRADES...', W/2 - 100, H/2);
-    return;
-  }
-
-  const min  = Math.min(...points), max = Math.max(...points);
-  const pad  = 16, range = max - min || 1;
-  const toX  = i => pad + (i / (points.length - 1)) * (W - pad * 2);
-  const toY  = v => pad + (1 - (v - min) / range) * (H - pad * 2);
-
-  // Area fill (Monochrome Gradient)
-  const grad = ctx.createLinearGradient(0, 0, 0, H);
-  grad.addColorStop(0, 'rgba(255, 255, 255, 0.15)');
-  grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
-
-  ctx.beginPath();
-  ctx.moveTo(toX(0), toY(points[0]));
-  points.forEach((v, i) => ctx.lineTo(toX(i), toY(v)));
-  ctx.lineTo(toX(points.length-1), H);
-  ctx.lineTo(toX(0), H);
-  ctx.closePath();
-  ctx.fillStyle = grad;
-  ctx.fill();
-
-  // Line (Solid White)
-  ctx.beginPath();
-  ctx.moveTo(toX(0), toY(points[0]));
-  points.forEach((v, i) => ctx.lineTo(toX(i), toY(v)));
-  ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
-
-  // Zero line (Dashed Gray)
-  if (min < 0 && max > 0) {
-    ctx.beginPath();
-    ctx.moveTo(pad, toY(0)); ctx.lineTo(W - pad, toY(0));
-    ctx.strokeStyle = '#444444'; ctx.lineWidth = 1;
-    ctx.setLineDash([4,4]); ctx.stroke(); ctx.setLineDash([]);
+    showKeyResult(returnKeyData.key, false, returnKeyData.expires_at);
   }
 }
 
-// ─── STATUS LOG ──────────────────────────────────────────
-function renderStatusLog(statuses) {
-  const wrap = document.getElementById('statusLog');
-  if (!statuses.length) {
-    wrap.innerHTML = '<div class="log-entry"><span class="log-time">—</span><span class="log-msg muted-val">NO LOG ENTRIES</span></div>';
-    return;
+function regenKey() {
+  // reset task state and go to task page
+  taskDone = false;
+  const box = document.getElementById('task-box-1');
+  const num = document.getElementById('task-num-1');
+  const status = document.getElementById('task-status-1');
+  
+  box.style.borderLeftColor = 'var(--border-focus)';
+  num.textContent = '1';
+  num.style.background = 'var(--bg-dark)';
+  num.style.color = 'var(--text-main)';
+  status.textContent = 'START';
+  status.style.background = 'var(--border-focus)';
+  status.style.color = 'var(--text-main)';
+  
+  document.getElementById('btn-gen').disabled = true;
+  document.getElementById('task-alert').className = 'alert alert-info';
+  document.getElementById('task-alert').textContent = 'กรุณากดเริ่ม Task ด้านบนเพื่อปลดล็อคขั้นตอนถัดไป';
+  
+  if (returnKeyData) {
+    document.getElementById('hwid-input').value = returnKeyData.hwid;
   }
-  wrap.innerHTML = statuses.map(s => {
-    const cls = s.status?.includes('STOPPED') ? 'err'
-              : s.status?.includes('IN_TRADE') ? 'warn'
-              : 'ok';
-    const time = (s.updated_at || '').substring(0,19).replace('T',' ');
-    return `<div class="log-entry">
-      <span class="log-time">[${time}]</span>
-      <span class="log-msg ${cls}">${s.status} — BAL: ${(s.balance||0).toFixed(2)} | EQ: ${(s.equity||0).toFixed(2)} | STRK: ${s.consec_loss}</span>
-    </div>`;
-  }).join('');
+  goTo('page-task');
 }
 
-function addLogEntry(msg, cls='') {
-  const wrap = document.getElementById('statusLog');
-  const time = new Date().toLocaleTimeString('th-TH');
-  const el = document.createElement('div');
-  el.className = 'log-entry';
-  el.innerHTML = `<span class="log-time">[${time}]</span><span class="log-msg ${cls}">${msg}</span>`;
-  wrap.prepend(el);
+// ══════════════════════════════════════════════════
+//  SHOW KEY RESULT + TIMER
+// ══════════════════════════════════════════════════
+let countdownInterval = null;
+
+function showKeyResult(key, isPermanent, expiresAt) {
+  document.getElementById('result-key').textContent = key;
+
+  const badge = document.getElementById('key-type-badge');
+  const timerSec = document.getElementById('timer-section');
+
+  if (isPermanent) {
+    badge.className = 'alert alert-warn';
+    badge.innerHTML = 'License Type: <strong>PREMIUM LIFETIME</strong>';
+    timerSec.style.display = 'none';
+  } else {
+    badge.className = 'alert alert-success';
+    badge.innerHTML = 'License Type: <strong>STANDARD (24 HOURS)</strong>';
+    timerSec.style.display = 'block';
+    startCountdown(new Date(expiresAt));
+  }
+
+  goTo('page-key');
 }
 
-// Resize chart on window resize
-window.addEventListener('resize', () => { if(allTrades.length) renderEquityCurve(allTrades); });
+function startCountdown(expDate) {
+  if (countdownInterval) clearInterval(countdownInterval);
+
+  function update() {
+    const now  = new Date();
+    const diff = Math.max(0, Math.floor((expDate - now) / 1000));
+    const h    = Math.floor(diff / 3600);
+    const m    = Math.floor((diff % 3600) / 60);
+    const s    = diff % 60;
+    document.getElementById('countdown').textContent =
+      `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    if (diff <= 0) clearInterval(countdownInterval);
+  }
+
+  update();
+  countdownInterval = setInterval(update, 1000);
+}
+
+// ══════════════════════════════════════════════════
+//  COPY HELPERS (อัปเดตให้รองรับ iFrame & Browser เก่า)
+// ══════════════════════════════════════════════════
+function fallbackCopyTextToClipboard(text) {
+  var textArea = document.createElement("textarea");
+  textArea.value = text;
+  textArea.style.top = "0";
+  textArea.style.left = "0";
+  textArea.style.position = "fixed";
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  try {
+    document.execCommand('copy');
+  } catch (err) {}
+  document.body.removeChild(textArea);
+}
+
+function doCopy(text, btnId) {
+  if (!navigator.clipboard) {
+    fallbackCopyTextToClipboard(text);
+  } else {
+    navigator.clipboard.writeText(text).catch(() => {
+      fallbackCopyTextToClipboard(text);
+    });
+  }
+  
+  const btn = document.getElementById(btnId);
+  const originalHTML = btn.innerHTML;
+  btn.innerHTML = '✓';
+  btn.classList.add('copied');
+  setTimeout(() => { btn.innerHTML = originalHTML; btn.classList.remove('copied'); }, 1500);
+}
+
+function copyKey() {
+  doCopy(document.getElementById('result-key').textContent, 'copy-key-btn');
+}
+
+function copyReturnKey() {
+  doCopy(document.getElementById('return-key-val').textContent, 'copy-return-btn');
+}
 </script>
 </body>
 </html>
