@@ -1034,8 +1034,8 @@ async function startTask() {
       if (bar) { requestAnimationFrame(() => bar.classList.add("tick")); }
     });
 
-    // ④ เปิดแท็บ work.ink
-    window.open(`${CONFIG.TASK_LINK}?r=${encodeURIComponent(callbackURL)}`, "_blank");
+    // ④ เปิดแท็บ work.ink ตรงๆ ไม่ต่อ ?r= (ใช้ polling แทน callback redirect)
+    window.open(CONFIG.TASK_LINK, "_blank");
 
     // ⑤ เริ่ม polling Supabase ทุก 4 วินาที (ไม่ต้องพึ่ง BroadcastChannel เพียงอย่างเดียว)
     startPolling(token);
