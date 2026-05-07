@@ -755,63 +755,37 @@ let pollStartTime  = null;   // ← NEW: เวลาเริ่ม poll
 
 // ==========================================
 // BOOT — ตรวจสอบ callback จาก work.ink
+// ── ตรรกะใหม่ (ไม่ใช้ ?r= parameter) ──
+// Main tab     : set sessionStorage["wexz_main"]="1" ตอน startTask()
+// Callback tab : เปิดจาก work.ink -> ไม่มี sessionStorage -> แต่มี localStorage token
 // ==========================================
 const verifyChannel = new BroadcastChannel("wexz_verify");
 
 window.addEventListener("DOMContentLoaded", async () => {
+
+  // fallback: ?verified=TOKEN ใน URL (แบบเก่า)
   const params   = new URLSearchParams(window.location.search);
   const incoming = params.get("verified");
-
-  // ── กรณีนี้คือแท็บ callback (แท็บใหม่ที่ work.ink redirect กลับมา) ──
   if (incoming) {
     history.replaceState({}, "", window.location.pathname);
-    const stored = localStorage.getItem(CONFIG.TOKEN_KEY);
-
-    if (!stored || incoming !== stored) {
-      verifyChannel.postMessage({ type: "FAILED" });
-      localStorage.removeItem(CONFIG.TOKEN_KEY);
-      setTimeout(() => window.close(), 400);
-      return;
-    }
-
-    try {
-      const rows = await (async () => {
-        const url = `${CONFIG.SUPABASE_URL}/rest/v1/verify_tokens?token=eq.${encodeURIComponent(incoming)}&verified=eq.false&used=eq.false&limit=1`;
-        const res = await fetch(url, { method: "GET", headers: SB_HEADERS });
-        if (!res.ok) throw new Error("DB check failed");
-        return res.json();
-      })();
-
-      if (!rows || rows.length === 0 || new Date(rows[0].expires_at) < new Date()) {
-        verifyChannel.postMessage({ type: "FAILED" });
-        localStorage.removeItem(CONFIG.TOKEN_KEY);
-        setTimeout(() => window.close(), 400);
-        return;
-      }
-
-      const patchURL = `${CONFIG.SUPABASE_URL}/rest/v1/verify_tokens?token=eq.${encodeURIComponent(incoming)}`;
-      await fetch(patchURL, {
-        method : "PATCH",
-        headers: SB_HEADERS,
-        body   : JSON.stringify({ verified: true }),
-      });
-
-      verifyChannel.postMessage({ type: "VERIFIED", token: incoming });
-      localStorage.removeItem(CONFIG.TOKEN_KEY);
-      setTimeout(() => window.close(), 400);
-
-    } catch {
-      verifyChannel.postMessage({ type: "FAILED" });
-      localStorage.removeItem(CONFIG.TOKEN_KEY);
-      setTimeout(() => window.close(), 400);
-    }
+    await _handleCallbackToken(incoming);
     return;
   }
 
-  // ── กรณีปกติ: แท็บหลัก ──
+  // ตรวจ: callback tab ที่ work.ink "Go To Destination" redirect มาเว็บเรา
+  // เงื่อนไข: มี localStorage token + ไม่มี sessionStorage flag (ไม่ใช่ main tab)
+  const pendingToken = localStorage.getItem(CONFIG.TOKEN_KEY);
+  const isMainTab    = sessionStorage.getItem("wexz_main");
+
+  if (pendingToken && !isMainTab) {
+    logAction("Callback tab detected. Processing verification...", "info");
+    await _handleCallbackToken(pendingToken);
+    return;
+  }
+
+  // กรณีปกติ: แท็บหลัก
   logAction("System initialized. Secure Gateway active.", "success");
 
-  // ฟัง BroadcastChannel จากแท็บ callback (fast path)
   verifyChannel.onmessage = (event) => {
     if (event.data.type === "VERIFIED") {
       handleVerifySuccess(event.data.token);
@@ -820,6 +794,45 @@ window.addEventListener("DOMContentLoaded", async () => {
     }
   };
 });
+
+// Helper: รับ token -> ตรวจ DB -> mark verified -> ส่ง broadcast -> ปิดแท็บ
+async function _handleCallbackToken(token) {
+  const stored = localStorage.getItem(CONFIG.TOKEN_KEY);
+  if (!stored || token !== stored) {
+    verifyChannel.postMessage({ type: "FAILED" });
+    localStorage.removeItem(CONFIG.TOKEN_KEY);
+    setTimeout(() => window.close(), 500);
+    return;
+  }
+
+  try {
+    const checkURL = `${CONFIG.SUPABASE_URL}/rest/v1/verify_tokens?token=eq.${encodeURIComponent(token)}&verified=eq.false&used=eq.false&limit=1`;
+    const res      = await fetch(checkURL, { method: "GET", headers: SB_HEADERS });
+    if (!res.ok) throw new Error("DB check failed");
+    const rows = await res.json();
+
+    if (!rows || rows.length === 0 || new Date(rows[0].expires_at) < new Date()) {
+      verifyChannel.postMessage({ type: "FAILED" });
+      localStorage.removeItem(CONFIG.TOKEN_KEY);
+      setTimeout(() => window.close(), 500);
+      return;
+    }
+
+    await fetch(
+      `${CONFIG.SUPABASE_URL}/rest/v1/verify_tokens?token=eq.${encodeURIComponent(token)}`,
+      { method: "PATCH", headers: SB_HEADERS, body: JSON.stringify({ verified: true }) }
+    );
+
+    verifyChannel.postMessage({ type: "VERIFIED", token });
+    localStorage.removeItem(CONFIG.TOKEN_KEY);
+    setTimeout(() => window.close(), 500);
+
+  } catch {
+    verifyChannel.postMessage({ type: "FAILED" });
+    localStorage.removeItem(CONFIG.TOKEN_KEY);
+    setTimeout(() => window.close(), 500);
+  }
+}
 
 // ==========================================
 // ✅ NEW: Supabase Polling (fallback หลัก)
@@ -1014,9 +1027,9 @@ async function startTask() {
       used       : false,
     });
 
-    // ② เก็บ token ใน localStorage
+    // ② เก็บ token ใน localStorage + mark this tab as main tab
     localStorage.setItem(CONFIG.TOKEN_KEY, token);
-    const callbackURL = buildCallbackURL(token);
+    sessionStorage.setItem("wexz_main", "1"); // flag: นี่คือ main tab ไม่ใช่ callback tab
 
     logAction("Verification session created. Opening gateway...", "info");
 
