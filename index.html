@@ -3,1108 +3,1200 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WexZ Hub — Key System</title>
+<title>WexZ Hub - Key System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-/* ─── RESET & ROOT ─────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* =========================================
+   WEXZ HUB - MINIMALIST MONOCHROME THEME
+   ========================================= */
+
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; padding: 0; }
 
 :root {
-  --bg:       #080808;
-  --surface:  #111111;
-  --card:     #161616;
-  --card2:    #1c1c1c;
-  --border:   rgba(255,255,255,0.07);
-  --border-hi:rgba(255,255,255,0.14);
-  --text:     #f0f0f0;
-  --muted:    #555;
-  --muted2:   #777;
-  --white:    #ffffff;
-  --green:    #3ddc84;
-  --green-dim:#1a3d28;
-  --red:      #ff5f5f;
-  --gold:     #f0c060;
-  --gold-dim: #3a2a08;
-  --mono:     'Space Mono', monospace;
-  --sans:     'Sora', sans-serif;
-  --r:        12px;
-  --r-lg:     20px;
+  --bg: #000000;
+  --surface: #0a0a0a;
+  --border: #1f1f1f;
+  --text-main: #ffffff;
+  --text-muted: #888888;
+  --accent: #ffffff;
+  --accent-invert: #000000;
+  --radius: 12px;
+  --font-sans: "IBM Plex Sans Thai", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
 }
 
-html, body {
-  min-height: 100vh;
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--sans);
-  font-size: 15px;
-  line-height: 1.6;
-  overflow-x: hidden;
-}
-
-/* ─── NOISE OVERLAY ────────────────────────── */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.6;
-}
-
-/* ─── GLOW BG ───────────────────────────────── */
-.bg-glow {
-  position: fixed;
-  width: 600px; height: 600px;
-  border-radius: 50%;
-  filter: blur(120px);
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.07;
-}
-.bg-glow-1 { background: #fff; top: -200px; left: -200px; }
-.bg-glow-2 { background: #fff; bottom: -200px; right: -200px; opacity: 0.04; }
-
-/* ─── LAYOUT ────────────────────────────────── */
-.app {
-  position: relative;
-  z-index: 1;
-  min-height: 100vh;
+body {
+  background-color: var(--bg);
+  color: var(--text-main);
+  font-family: var(--font-sans);
   display: flex;
-  flex-direction: column;
-}
-
-nav {
-  display: flex;
+  justify-content: center;
   align-items: center;
-  padding: 20px 40px;
-  border-bottom: 1px solid var(--border);
-  gap: 12px;
+  min-height: 100vh;
+  padding: 20px;
+  -webkit-font-smoothing: antialiased;
 }
-.nav-logo {
-  font-family: var(--mono);
-  font-weight: 700;
-  font-size: 16px;
-  letter-spacing: 0.06em;
-  color: var(--white);
-}
-.nav-logo span { color: var(--muted2); font-weight: 400; }
-.nav-badge {
-  font-family: var(--mono);
-  font-size: 10px;
-  padding: 2px 8px;
-  border: 1px solid var(--border-hi);
-  border-radius: 4px;
-  color: var(--muted2);
-  letter-spacing: 0.08em;
-}
-.nav-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
-.nav-status {
-  display: flex; align-items: center; gap: 6px;
-  font-size: 11px; color: var(--muted2); font-family: var(--mono);
-}
-.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 
-main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
+.app-container {
+  width: 100%;
+  max-width: 420px;
+  position: relative;
+}
 
-/* ─── PAGE TRANSITIONS ──────────────────────── */
+/* Logo Integration */
+.logo-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+
+.main-logo {
+  height: 110px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* Page Transitions */
 .page {
   display: none;
-  width: 100%;
-  max-width: 520px;
-  animation: fadeUp 0.35s ease both;
-}
-.page.active { display: block; }
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
+  animation: fadeIn 0.4s ease forwards;
 }
 
-/* ─── CARDS ─────────────────────────────────── */
-.card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  padding: 32px;
-  position: relative;
-  overflow: hidden;
-}
-.card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+.page.active {
+  display: block;
 }
 
-/* ─── BRAND HEADER ──────────────────────────── */
-.brand-header {
-  text-align: center;
-  margin-bottom: 32px;
-}
-.brand-icon {
-  width: 56px; height: 56px;
-  background: var(--card2);
-  border: 1px solid var(--border-hi);
-  border-radius: 14px;
-  display: inline-flex; align-items: center; justify-content: center;
-  font-size: 22px;
-  margin-bottom: 16px;
-}
-.brand-title {
-  font-family: var(--mono);
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: var(--white);
-  margin-bottom: 4px;
-}
-.brand-sub {
-  font-size: 13px;
-  color: var(--muted2);
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* ─── SECTION LABEL ─────────────────────────── */
-.section-label {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.12em;
-  color: var(--muted);
-  text-transform: uppercase;
-  margin-bottom: 12px;
+/* Typography */
+.title {
+  font-size: 26px;
+  font-weight: 500;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.5px;
 }
 
-/* ─── PLAN CARDS ────────────────────────────── */
-.plan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+.subtitle {
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--text-muted);
+  margin: 0 0 32px 0;
+  line-height: 1.5;
+}
 
-.plan-card {
-  padding: 18px;
-  background: var(--card2);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  cursor: pointer;
-  transition: border-color .15s, background .15s, transform .12s;
-  position: relative;
-}
-.plan-card:hover {
-  border-color: var(--border-hi);
-  background: #1f1f1f;
-  transform: translateY(-1px);
-}
-.plan-card.selected { border-color: var(--white); }
-.plan-card .plan-icon { font-size: 20px; margin-bottom: 10px; }
-.plan-card .plan-name {
-  font-family: var(--mono);
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--white);
-  margin-bottom: 4px;
-}
-.plan-card .plan-desc { font-size: 11px; color: var(--muted2); line-height: 1.5; }
-.plan-card .plan-price {
-  font-family: var(--mono);
-  font-size: 13px;
-  color: var(--gold);
-  margin-top: 10px;
-}
-.plan-card.free .plan-price { color: var(--green); }
-.plan-card .plan-badge {
-  position: absolute; top: 12px; right: 12px;
-  font-family: var(--mono); font-size: 9px;
-  padding: 2px 6px; border-radius: 4px;
-  border: 1px solid;
-}
-.plan-card.free .plan-badge { color: var(--green); border-color: rgba(61,220,132,.25); background: rgba(61,220,132,.06); }
-.plan-card.premium .plan-badge { color: var(--gold); border-color: rgba(240,192,96,.25); background: rgba(240,192,96,.06); }
-
-/* ─── BUTTONS ────────────────────────────────── */
+/* Buttons */
 .btn {
   width: 100%;
-  padding: 13px 20px;
-  border: none;
-  border-radius: var(--r);
-  font-family: var(--sans);
-  font-size: 14px;
-  font-weight: 600;
+  padding: 14px 20px;
+  border-radius: var(--radius);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 500;
   cursor: pointer;
-  transition: all .15s;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: all 0.2s ease;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
 }
+
 .btn-primary {
-  background: var(--white);
-  color: #000;
+  background: var(--accent);
+  color: var(--accent-invert);
 }
-.btn-primary:hover { background: #e0e0e0; transform: translateY(-1px); }
-.btn-primary:active { transform: translateY(0); }
+
+.btn-primary:hover:not(:disabled) {
+  background: #e6e6e6;
+  transform: translateY(-1px);
+}
+
+.btn-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
 
 .btn-outline {
   background: transparent;
-  color: var(--text);
-  border: 1px solid var(--border-hi);
+  color: var(--text-main);
+  border: 1px solid var(--border);
 }
-.btn-outline:hover { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.22); }
 
-.btn-ghost {
-  background: transparent;
-  color: var(--muted2);
-  font-size: 12px;
-  padding: 8px;
-  width: auto;
+.btn-outline:hover {
+  background: var(--surface);
+  border-color: #333;
 }
-.btn-ghost:hover { color: var(--text); }
 
-.btn-green { background: var(--green); color: #000; }
-.btn-green:hover { background: #5ae89e; transform: translateY(-1px); }
-
-.btn-gold { background: var(--gold); color: #000; }
-.btn-gold:hover { background: #f5d080; transform: translateY(-1px); }
-
-.btn + .btn { margin-top: 8px; }
-
-.btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
-
-/* ─── INPUT ──────────────────────────────────── */
-.input-group { margin-bottom: 16px; }
-.input-label {
-  display: block;
-  font-size: 11px;
-  color: var(--muted2);
-  margin-bottom: 6px;
-  font-family: var(--mono);
+.btn-back {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 14px;
+  padding: 0;
+  margin-bottom: 24px;
+  cursor: pointer;
+  transition: color 0.2s;
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-sans);
 }
-.input-field {
+
+.btn-back:hover {
+  color: var(--text-main);
+}
+
+/* Menu List (Options Stack) */
+.option-row {
+  display: flex;
+  align-items: center;
   width: 100%;
-  padding: 11px 14px;
-  background: var(--card2);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  color: var(--text);
-  font-family: var(--mono);
-  font-size: 13px;
-  outline: none;
-  transition: border-color .15s;
-}
-.input-field:focus { border-color: var(--border-hi); }
-.input-field::placeholder { color: var(--muted); }
-
-/* ─── DIVIDER ────────────────────────────────── */
-.divider {
-  display: flex; align-items: center; gap: 12px;
-  margin: 20px 0; color: var(--muted); font-size: 11px;
-  font-family: var(--mono);
-}
-.divider::before, .divider::after {
-  content: ''; flex: 1; height: 1px; background: var(--border);
-}
-
-/* ─── STEP INDICATOR ─────────────────────────── */
-.steps {
-  display: flex; align-items: center; justify-content: center;
-  gap: 0; margin-bottom: 28px;
-}
-.step {
-  display: flex; align-items: center; gap: 0;
-}
-.step-dot {
-  width: 28px; height: 28px;
-  border-radius: 50%;
-  border: 1px solid var(--border);
-  background: var(--card2);
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--mono); font-size: 11px;
-  color: var(--muted2);
-  transition: all .2s;
-  flex-shrink: 0;
-}
-.step-dot.active { border-color: var(--white); color: var(--white); background: rgba(255,255,255,.08); }
-.step-dot.done { background: var(--white); color: #000; border-color: var(--white); }
-.step-line { width: 32px; height: 1px; background: var(--border); }
-.step-line.done { background: rgba(255,255,255,.3); }
-
-/* ─── TASK BOX ───────────────────────────────── */
-.task-box {
-  background: var(--card2);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
   padding: 16px;
-  margin-bottom: 16px;
-  display: flex; align-items: center; gap: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 12px;
   cursor: pointer;
-  transition: border-color .15s, background .15s;
+  transition: all 0.2s ease;
+  text-align: left;
+  color: var(--text-main);
 }
-.task-box:hover { border-color: var(--border-hi); background: #1e1e1e; }
-.task-box.done { border-color: rgba(61,220,132,.3); background: rgba(61,220,132,.04); }
-.task-num {
-  width: 32px; height: 32px; border-radius: 8px;
-  background: var(--card); border: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--mono); font-size: 12px; font-weight: 700;
-  flex-shrink: 0;
-}
-.task-box.done .task-num { background: var(--green-dim); border-color: rgba(61,220,132,.3); color: var(--green); }
-.task-info { flex: 1; }
-.task-title { font-size: 13px; font-weight: 600; color: var(--white); }
-.task-desc { font-size: 11px; color: var(--muted2); margin-top: 1px; }
-.task-status { font-family: var(--mono); font-size: 11px; color: var(--muted); }
-.task-box.done .task-status { color: var(--green); }
 
-/* ─── KEY DISPLAY ────────────────────────────── */
-.key-display {
-  background: var(--card2);
-  border: 1px solid var(--border-hi);
-  border-radius: var(--r);
-  padding: 16px 18px;
-  display: flex; align-items: center; gap: 12px;
-  margin-bottom: 16px;
+.option-row:hover {
+  background: #111;
+  border-color: #333;
 }
-.key-value {
+
+.option-icon {
+  font-size: 20px;
+  margin-right: 16px;
+  opacity: 0.9;
+  display: flex;
+}
+
+.option-text {
   flex: 1;
-  font-family: var(--mono);
+}
+
+.opt-title {
+  display: block;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.opt-desc {
+  display: block;
   font-size: 13px;
-  color: var(--white);
-  letter-spacing: 0.04em;
-  word-break: break-all;
-}
-.key-copy-btn {
-  flex-shrink: 0;
-  width: 32px; height: 32px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; font-size: 14px;
-  transition: all .15s; color: var(--muted2);
-}
-.key-copy-btn:hover { border-color: var(--border-hi); color: var(--white); }
-.key-copy-btn.copied { background: var(--green-dim); border-color: rgba(61,220,132,.3); color: var(--green); }
-
-/* ─── TIMER ──────────────────────────────────── */
-.timer-display {
-  text-align: center;
-  font-family: var(--mono);
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--white);
-  letter-spacing: 0.06em;
-  margin: 8px 0;
-}
-.timer-label { text-align: center; font-size: 11px; color: var(--muted2); margin-bottom: 20px; }
-.timer-bar-wrap {
-  height: 3px; background: var(--border); border-radius: 2px; margin-bottom: 20px; overflow: hidden;
-}
-.timer-bar {
-  height: 100%; background: var(--white); border-radius: 2px;
-  transition: width 1s linear;
+  font-weight: 300;
+  color: var(--text-muted);
+  margin-top: 2px;
 }
 
-/* ─── INFO ROW ───────────────────────────────── */
-.info-row {
-  display: flex; align-items: center; gap: 10px;
-  padding: 10px 12px;
-  background: var(--card2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+.option-arrow {
+  color: var(--text-muted);
+  transition: transform 0.2s;
+}
+
+.option-row:hover .option-arrow {
+  transform: translateX(4px);
+  color: var(--text-main);
+}
+
+/* Input Fields */
+.input-group {
+  margin-bottom: 24px;
+}
+
+.input-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 300;
+  color: var(--text-muted);
   margin-bottom: 8px;
-  font-size: 12px;
 }
-.info-row .info-icon { font-size: 14px; flex-shrink: 0; }
-.info-row .info-text { color: var(--muted2); }
-.info-row .info-text strong { color: var(--text); }
 
-/* ─── ALERT ──────────────────────────────────── */
-.alert {
-  padding: 11px 14px;
-  border-radius: 8px;
-  font-size: 12px;
-  margin-bottom: 14px;
-  display: flex; align-items: flex-start; gap: 8px;
-}
-.alert-info { background: rgba(255,255,255,.04); border: 1px solid var(--border); color: var(--muted2); }
-.alert-success { background: rgba(61,220,132,.07); border: 1px solid rgba(61,220,132,.2); color: var(--green); }
-.alert-warn { background: rgba(240,192,96,.07); border: 1px solid rgba(240,192,96,.2); color: var(--gold); }
-.alert-error { background: rgba(255,95,95,.07); border: 1px solid rgba(255,95,95,.2); color: var(--red); }
-
-/* ─── SPINNER ────────────────────────────────── */
-.spinner {
-  display: inline-block;
-  width: 14px; height: 14px;
-  border: 2px solid rgba(255,255,255,.2);
-  border-top-color: var(--white);
-  border-radius: 50%;
-  animation: spin .6s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ─── RETURN OPTION CARDS ────────────────────── */
-.option-grid { display: grid; gap: 10px; margin-bottom: 20px; }
-.option-card {
+.input {
+  width: 100%;
   padding: 16px;
-  background: var(--card2);
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--r);
-  cursor: pointer;
-  transition: border-color .15s, background .15s;
-  display: flex; align-items: center; gap: 14px;
+  border-radius: var(--radius);
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  transition: all 0.2s;
+  box-sizing: border-box;
 }
-.option-card:hover { border-color: var(--border-hi); background: #1e1e1e; }
-.option-icon { font-size: 20px; flex-shrink: 0; }
-.option-info .opt-title { font-size: 13px; font-weight: 600; color: var(--white); }
-.option-info .opt-desc { font-size: 11px; color: var(--muted2); margin-top: 2px; }
-.option-arrow { margin-left: auto; color: var(--muted); font-size: 16px; }
 
-/* ─── FOOTER ─────────────────────────────────── */
-footer {
-  text-align: center;
-  padding: 20px;
+.input:focus {
+  outline: none;
+  border-color: #555;
+  background: #111;
+}
+
+.input::placeholder {
+  color: #444;
+}
+
+/* Utilities */
+.w-full { width: 100%; }
+.mt-4 { margin-top: 16px; }
+.mt-6 { margin-top: 24px; }
+.mt-8 { margin-top: 32px; }
+.mb-4 { margin-bottom: 16px; }
+.mb-6 { margin-bottom: 24px; }
+.text-center { text-align: center; }
+.font-mono { font-family: var(--font-mono); }
+.text-lg { font-size: 18px; }
+.text-3xl { font-size: 36px; }
+.text-muted { color: var(--text-muted); }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* Dividers */
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 32px 0;
+  color: #444;
   font-size: 11px;
-  color: var(--muted);
-  font-family: var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.divider::before, .divider::after {
+  content: "";
+  flex: 1;
   border-top: 1px solid var(--border);
 }
-footer a { color: var(--muted2); text-decoration: none; }
-footer a:hover { color: var(--text); }
 
-/* ─── CONFIG NOTICE ─────────────────────────── */
-.config-notice {
-  background: rgba(240,192,96,.06);
-  border: 1px solid rgba(240,192,96,.18);
-  border-radius: 8px;
-  padding: 10px 14px;
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--gold);
+.divider::before { margin-right: 16px; }
+.divider::after { margin-left: 16px; }
+
+/* Alerts */
+.alert {
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 300;
   margin-bottom: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
 }
+
+.alert.success { color: #fff; border-color: rgba(255,255,255,0.3); }
+.alert.error { color: #ff5555; border-color: rgba(255,85,85,0.2); background: rgba(255,0,0,0.05); }
+
+/* Key Display Box */
+.key-box {
+  display: flex;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 6px 6px 6px 16px;
+  margin-bottom: 24px;
+}
+
+.key-box span {
+  flex: 1;
+  word-break: break-all;
+  color: var(--text-main);
+  letter-spacing: 0.5px;
+}
+
+.btn-icon {
+  background: #ffffff;
+  color: #000000;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-weight: 500;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-icon:hover { background: #e6e6e6; }
+.btn-icon.copied { background: #ffffff; color: #000; opacity: 0.8; }
+
+/* Feature List (Premium Page) */
+.feature-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 32px 0;
+}
+
+.feature-list li {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  font-weight: 300;
+  color: #ccc;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.feature-list li:last-child { border-bottom: none; }
+.feature-list li svg { color: #fff; opacity: 0.7; }
+
+/* Interactive Task Card */
+.task-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: all 0.2s;
+}
+
+.task-card:hover { border-color: #444; }
+.task-card.done { border-color: #fff; }
+
+.task-status {
+  font-size: 12px;
+  padding: 6px 12px;
+  background: #1f1f1f;
+  border-radius: 6px;
+  color: #fff;
+  transition: all 0.2s;
+}
+
+.task-card.done .task-status {
+  background: #fff;
+  color: #000;
+}
+
+/* Minimal Timer */
+.timer-minimal {
+  padding: 24px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+/* Spinner Loader */
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(0,0,0,0.2);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.btn-outline .spinner {
+  border-color: rgba(255,255,255,0.2);
+  border-top-color: currentColor;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Waiting pulse on task card */
+.task-card.waiting {
+  border-color: #444;
+  animation: pulse-border 2s ease-in-out infinite;
+  cursor: default;
+}
+
+@keyframes pulse-border {
+  0%, 100% { border-color: #333; }
+  50%       { border-color: #666; }
+}
+
+/* Live Activity Monitor */
+.monitor-card {
+  margin-top: 32px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+
+.monitor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.monitor-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.log-container {
+  max-height: 100px;
+  overflow-y: auto;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: #666;
+  line-height: 1.6;
+}
+
+.log-entry {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 4px;
+  animation: fadeIn 0.3s ease;
+}
+
+.log-time { color: #444; min-width: 55px; }
+.log-msg { color: #888; }
+.log-msg.success { color: #00ff88; }
+.log-msg.info { color: #fff; }
+.log-msg.error { color: #ff5555; }
+
+/* Scrollbar for log */
+.log-container::-webkit-scrollbar { width: 4px; }
+.log-container::-webkit-scrollbar-track { background: transparent; }
+.log-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+/* Connection Details */
+.conn-details {
+  display: flex;
+  gap: 16px;
+  font-size: 10px;
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+.conn-item { display: flex; align-items: center; gap: 4px; }
+.conn-led { width: 4px; height: 4px; border-radius: 50%; background: #444; }
+.conn-led.active { background: #00ff88; box-shadow: 0 0 4px #00ff88; }
 </style>
 </head>
 <body>
 
-<!-- BG Glows -->
-<div class="bg-glow bg-glow-1"></div>
-<div class="bg-glow bg-glow-2"></div>
+<div class="app-container">
+  
+  <!-- WEXZ Minimal Logo -->
+  <div class="logo-container">
+    <img src="1.jpg" alt="WEXZ" class="main-logo">
+  </div>
 
-<div class="app">
-  <!-- NAV -->
-  <nav>
-    <div class="nav-logo">WEXZ<span>/</span>HUB</div>
-    <div class="nav-badge">KEY SYSTEM</div>
-    <div class="nav-right">
-      <div class="nav-status">
-        <span class="status-dot"></span>
-        <span>Server Online</span>
+  <!-- PAGE: CHOOSE -->
+  <div class="page active" id="page-choose">
+    <h1 class="title">Welcome</h1>
+    <p class="subtitle">เลือกรูปแบบการรับคีย์สำหรับอุปกรณ์ของคุณ</p>
+
+    <button class="option-row" onclick="selectPlan('free')">
+      <div class="option-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
       </div>
-    </div>
-  </nav>
-
-  <main>
-
-    <!-- ════════ PAGE 0: CHOOSE TYPE ════════ -->
-    <div class="page active" id="page-choose">
-      <div class="card">
-        <div class="brand-header">
-          <div class="brand-icon">⚔️</div>
-          <div class="brand-title">WexZ Hub</div>
-          <div class="brand-sub">เลือกประเภทคีย์ที่ต้องการ</div>
-        </div>
-
-        <div class="section-label">เลือกแพลน</div>
-        <div class="plan-grid">
-          <div class="plan-card free" onclick="selectPlan('free')">
-            <div class="plan-badge">24HR</div>
-            <div class="plan-icon">⏱️</div>
-            <div class="plan-name">Free Key</div>
-            <div class="plan-desc">ทำ task สั้นๆ แล้วได้คีย์ฟรี</div>
-            <div class="plan-price">ฟรี</div>
-          </div>
-          <div class="plan-card premium" onclick="selectPlan('premium')">
-            <div class="plan-badge">∞</div>
-            <div class="plan-icon">👑</div>
-            <div class="plan-name">Permanent</div>
-            <div class="plan-desc">คีย์ถาวร ไม่ต้องทำซ้ำ</div>
-            <div class="plan-price">ติดต่อ Admin</div>
-          </div>
-        </div>
-
-        <div class="divider">หรือ</div>
-
-        <button class="btn btn-outline" onclick="goTo('page-return')">
-          🔑 มีคีย์เก่าอยู่แล้ว / เช็คสถานะ
-        </button>
-
-        <div class="info-row" style="margin-top:16px">
-          <span class="info-icon">💡</span>
-          <span class="info-text">1 คีย์ต่อ 1 เครื่อง (HWID-based) — คีย์จะผูกกับเครื่องของคุณอัตโนมัติ</span>
-        </div>
+      <div class="option-text">
+        <span class="opt-title">Free Access (24H)</span>
+        <span class="opt-desc">ทำภารกิจ 1 ขั้นตอนเพื่อรับคีย์รายวัน</span>
       </div>
-    </div>
+      <div class="option-arrow">→</div>
+    </button>
 
-    <!-- ════════ PAGE 1: FREE KEY — TASK ════════ -->
-    <div class="page" id="page-task">
-      <div class="card">
-        <button class="btn-ghost" onclick="goTo('page-choose')" style="margin-bottom:16px;padding-left:0">← กลับ</button>
-
-        <div class="steps">
-          <div class="step">
-            <div class="step-dot active" id="step1">1</div>
-          </div>
-          <div class="step-line" id="line1"></div>
-          <div class="step">
-            <div class="step-dot" id="step2">2</div>
-          </div>
-          <div class="step-line" id="line2"></div>
-          <div class="step">
-            <div class="step-dot" id="step3">✓</div>
-          </div>
-        </div>
-
-        <div class="brand-header" style="margin-bottom:20px">
-          <div class="brand-title" style="font-size:18px">ทำ Task เพื่อรับคีย์ฟรี</div>
-          <div class="brand-sub">ทำให้ครบ 1 task แล้วกด "สร้างคีย์"</div>
-        </div>
-
-        <div id="task-list">
-          <div class="task-box" id="task-box-1" onclick="completeTask(1)">
-            <div class="task-num" id="task-num-1">1</div>
-            <div class="task-info">
-              <div class="task-title">เข้า Link สนับสนุน</div>
-              <div class="task-desc">กดลิงก์ด้านล่างแล้วรอ 15 วินาที</div>
-            </div>
-            <div class="task-status" id="task-status-1">กด →</div>
-          </div>
-        </div>
-
-        <div class="alert alert-info" id="task-alert">
-          ⚡ กด task ด้านบนก่อน จึงจะสร้างคีย์ได้
-        </div>
-
-        <button class="btn btn-primary" id="btn-gen" onclick="goToGenerate()" disabled>
-          สร้างคีย์ฟรี (24 ชั่วโมง)
-        </button>
+    <button class="option-row" onclick="selectPlan('premium')">
+      <div class="option-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
       </div>
+      <div class="option-text">
+        <span class="opt-title">Permanent Key</span>
+        <span class="opt-desc">ใช้งานถาวร ไม่ต้องทำภารกิจรายวัน</span>
+      </div>
+      <div class="option-arrow">→</div>
+    </button>
+
+    <div class="divider">หรือ</div>
+
+    <button class="btn btn-outline w-full" onclick="goTo('page-return')">
+      ตรวจสอบคีย์เดิม
+    </button>
+  </div>
+
+  <!-- PAGE: TASK -->
+  <div class="page" id="page-task">
+    <button class="btn-back" onclick="goTo('page-choose')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      กลับ
+    </button>
+    
+    <h1 class="title">Complete Task</h1>
+    <p class="subtitle">คลิกที่กล่องด้านล่างเพื่อเปิดลิงก์ และทำตามขั้นตอนจนครบ — ระบบจะยืนยันอัตโนมัติเมื่อเสร็จ</p>
+
+    <div class="task-card" id="task-box-1" onclick="startTask()">
+      <div class="option-text">
+        <span class="opt-title">Work.ink Support</span>
+        <span class="opt-desc">สนับสนุนผู้พัฒนา</span>
+      </div>
+      <div class="task-status" id="task-status-1">เริ่มเลย</div>
     </div>
 
-    <!-- ════════ PAGE 2: ENTER HWID & GENERATE ════════ -->
-    <div class="page" id="page-generate">
-      <div class="card">
-        <button class="btn-ghost" onclick="goTo('page-task')" style="margin-bottom:16px;padding-left:0">← กลับ</button>
+    <div class="alert" id="task-alert" style="display:none;"></div>
 
-        <div class="steps">
-          <div class="step"><div class="step-dot done">✓</div></div>
-          <div class="step-line done"></div>
-          <div class="step"><div class="step-dot active" id="step2b">2</div></div>
-          <div class="step-line" id="line2b"></div>
-          <div class="step"><div class="step-dot" id="step3b">3</div></div>
-        </div>
+    <button class="btn btn-primary w-full mt-6" id="btn-gen" disabled onclick="goToGenerate()">
+      ดำเนินการต่อ
+    </button>
+  </div>
 
-        <div class="brand-header" style="margin-bottom:20px">
-          <div class="brand-title" style="font-size:18px">ระบุ HWID ของคุณ</div>
-          <div class="brand-sub">คัดลอก HWID จากสคริปต์ในเกมแล้วใส่ที่นี่</div>
-        </div>
+  <!-- PAGE: GENERATE -->
+  <div class="page" id="page-generate">
+    <button class="btn-back" onclick="goTo('page-task')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      กลับ
+    </button>
+    
+    <h1 class="title">Link Device</h1>
+    <p class="subtitle">คัดลอก HWID จากหน้าต่างรันสคริปต์ในเกมมาวางที่นี่</p>
 
-        <div class="alert alert-info" style="margin-bottom:18px">
-          💻 รันสคริปต์ใน Roblox แล้วดู HWID ที่แสดงในช่อง Output
-        </div>
-
-        <div class="input-group">
-          <label class="input-label">HWID ของเครื่องคุณ</label>
-          <input class="input-field" id="hwid-input" type="text"
-            placeholder="WEXZ-XXXXXXXX-XXXX-XXXX" autocomplete="off" spellcheck="false">
-        </div>
-
-        <div id="gen-alert"></div>
-
-        <button class="btn btn-green" id="btn-create-key" onclick="createFreeKey()">
-          ✦ สร้างคีย์
-        </button>
-      </div>
+    <div class="input-group">
+      <label for="hwid-input">Hardware ID (HWID)</label>
+      <input type="text" id="hwid-input" class="input" placeholder="WEXZ-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false">
     </div>
 
-    <!-- ════════ PAGE 3: KEY RESULT ════════ -->
-    <div class="page" id="page-key">
-      <div class="card">
-        <div class="brand-header" style="margin-bottom:20px">
-          <div class="brand-icon">🎉</div>
-          <div class="brand-title" style="font-size:18px">ได้คีย์แล้ว!</div>
-          <div class="brand-sub">นำคีย์ไปใส่ในสคริปต์ใน Roblox</div>
-        </div>
+    <div id="gen-alert"></div>
 
-        <div class="section-label">คีย์ของคุณ</div>
-        <div class="key-display">
-          <div class="key-value" id="result-key">—</div>
-          <div class="key-copy-btn" id="copy-key-btn" onclick="copyKey()">📋</div>
-        </div>
+    <button class="btn btn-primary w-full mt-4" id="btn-create-key" onclick="createFreeKey()">
+      สร้างคีย์ 24 ชั่วโมง
+    </button>
+  </div>
 
-        <div id="key-type-badge" class="alert alert-success" style="margin-bottom:16px"></div>
-
-        <div id="timer-section" style="display:none">
-          <div class="timer-display" id="countdown">23:59:59</div>
-          <div class="timer-label">เวลาที่เหลือ</div>
-          <div class="timer-bar-wrap">
-            <div class="timer-bar" id="timer-bar" style="width:100%"></div>
-          </div>
-        </div>
-
-        <div class="section-label">วิธีใช้งาน</div>
-        <div class="info-row">
-          <span class="info-icon">1️⃣</span>
-          <span class="info-text">Copy คีย์ด้านบน</span>
-        </div>
-        <div class="info-row">
-          <span class="info-icon">2️⃣</span>
-          <span class="info-text">รัน Script ใน Roblox Executor</span>
-        </div>
-        <div class="info-row" style="margin-bottom:20px">
-          <span class="info-icon">3️⃣</span>
-          <span class="info-text">ใส่คีย์ในช่องที่ขึ้นมา แล้วกด Verify</span>
-        </div>
-
-        <button class="btn btn-outline" onclick="goTo('page-choose')">
-          ← กลับหน้าหลัก
-        </button>
+  <!-- PAGE: KEY RESULT -->
+  <div class="page" id="page-key">
+    <div class="text-center mb-6">
+      <div style="display:inline-flex; align-items:center; justify-content:center; width:48px; height:48px; border-radius:50%; background:#fff; color:#000; margin-bottom:16px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
       </div>
+      <h1 class="title">Access Granted</h1>
+      <p class="subtitle" id="key-type-kicker" style="margin-bottom:0;">คีย์พร้อมใช้งาน</p>
     </div>
 
-    <!-- ════════ PAGE 4: RETURN / CHECK ════════ -->
-    <div class="page" id="page-return">
-      <div class="card">
-        <button class="btn-ghost" onclick="goTo('page-choose')" style="margin-bottom:16px;padding-left:0">← กลับ</button>
-
-        <div class="brand-header" style="margin-bottom:20px">
-          <div class="brand-title" style="font-size:18px">เช็คคีย์เดิม</div>
-          <div class="brand-sub">ใส่ HWID เพื่อตรวจสอบคีย์ที่มีอยู่</div>
-        </div>
-
-        <div class="input-group">
-          <label class="input-label">HWID ของเครื่องคุณ</label>
-          <input class="input-field" id="return-hwid" type="text"
-            placeholder="WEXZ-XXXXXXXX-XXXX-XXXX" autocomplete="off" spellcheck="false">
-        </div>
-
-        <div id="return-alert"></div>
-
-        <button class="btn btn-primary" onclick="checkExistingKey()">
-          🔍 ตรวจสอบคีย์
-        </button>
-
-        <!-- ผลการตรวจสอบ -->
-        <div id="return-result" style="display:none; margin-top:20px">
-          <div class="divider">ผลการตรวจสอบ</div>
-
-          <div class="section-label">คีย์ที่พบ</div>
-          <div class="key-display">
-            <div class="key-value" id="return-key-val">—</div>
-            <div class="key-copy-btn" onclick="copyReturnKey()">📋</div>
-          </div>
-
-          <div id="return-status-badge" class="alert" style="margin-bottom:16px"></div>
-
-          <div class="section-label">คุณต้องการ</div>
-          <div class="option-grid">
-            <div class="option-card" id="opt-use-old" onclick="useOldKey()">
-              <div class="option-icon">✅</div>
-              <div class="option-info">
-                <div class="opt-title">ใช้คีย์เดิม</div>
-                <div class="opt-desc">Copy คีย์นี้ไปใช้ต่อ</div>
-              </div>
-              <div class="option-arrow">›</div>
-            </div>
-            <div class="option-card" id="opt-regen" onclick="regenKey()">
-              <div class="option-icon">🔄</div>
-              <div class="option-info">
-                <div class="opt-title">สร้างคีย์ใหม่</div>
-                <div class="opt-desc">ทำ Task แล้วรับคีย์ใหม่</div>
-              </div>
-              <div class="option-arrow">›</div>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div class="key-box">
+      <span id="result-key" class="font-mono text-lg">...</span>
+      <button class="btn-icon" id="copy-key-btn" onclick="copyKey()">Copy</button>
     </div>
 
-    <!-- ════════ PAGE 5: PREMIUM ════════ -->
-    <div class="page" id="page-premium">
-      <div class="card">
-        <button class="btn-ghost" onclick="goTo('page-choose')" style="margin-bottom:16px;padding-left:0">← กลับ</button>
+    <div id="key-type-badge" class="alert success text-center" style="border:none; background:rgba(255,255,255,0.05); color:#fff; font-weight:400;"></div>
 
-        <div class="brand-header" style="margin-bottom:20px">
-          <div class="brand-icon">👑</div>
-          <div class="brand-title" style="font-size:18px">Permanent Key</div>
-          <div class="brand-sub">คีย์ถาวร ไม่หมดอายุ ไม่ต้องทำ task</div>
-        </div>
-
-        <div class="alert alert-warn" style="margin-bottom:20px">
-          👑 คีย์ถาวรต้องซื้อผ่าน Admin โดยตรง
-        </div>
-
-        <div class="info-row">
-          <span class="info-icon">✦</span>
-          <span class="info-text"><strong>คีย์ถาวร</strong> — ใช้ได้ตลอด ไม่มีวันหมดอายุ</span>
-        </div>
-        <div class="info-row">
-          <span class="info-icon">🔒</span>
-          <span class="info-text"><strong>ผูก HWID</strong> — 1 คีย์ต่อ 1 เครื่อง</span>
-        </div>
-        <div class="info-row">
-          <span class="info-icon">⚡</span>
-          <span class="info-text"><strong>รับทันที</strong> — Admin ใส่ให้ใน Supabase</span>
-        </div>
-        <div class="info-row" style="margin-bottom:24px">
-          <span class="info-icon">💬</span>
-          <span class="info-text"><strong>ช่องทาง</strong> — Discord / Line ของ Admin WexZ</span>
-        </div>
-
-        <button class="btn btn-gold" onclick="alert('ติดต่อ Admin ผ่าน Discord หรือ Line!')">
-          👑 ติดต่อ Admin
-        </button>
-        <button class="btn btn-outline" style="margin-top:8px" onclick="goTo('page-return')">
-          🔑 มีคีย์ถาวรอยู่แล้ว? เช็คที่นี่
-        </button>
-      </div>
+    <div id="timer-section" class="timer-minimal text-center mt-6" style="display:none;">
+      <p class="text-muted" style="font-size:11px; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">หมดอายุในอีก</p>
+      <div id="countdown" class="font-mono text-3xl" style="font-weight:300;">23:59:59</div>
     </div>
 
-  </main>
+    <button class="btn btn-outline w-full mt-8" onclick="goTo('page-choose')">กลับหน้าหลัก</button>
+  </div>
 
-  <footer>
-    WexZ Hub Key System — Powered by
-    <a href="https://supabase.com" target="_blank">Supabase</a> &nbsp;·&nbsp;
-    <span id="footer-time"></span>
-  </footer>
+  <!-- PAGE: RETURN / CHECK -->
+  <div class="page" id="page-return">
+    <button class="btn-back" onclick="goTo('page-choose')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      กลับ
+    </button>
+
+    <h1 class="title">Verify Key</h1>
+    <p class="subtitle">ป้อน HWID ของคุณเพื่อตรวจสอบสถานะคีย์ปัจจุบัน</p>
+
+    <div class="input-group">
+      <label for="return-hwid">Hardware ID (HWID)</label>
+      <input type="text" id="return-hwid" class="input" placeholder="WEXZ-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false">
+    </div>
+
+    <div id="return-alert"></div>
+
+    <button class="btn btn-primary w-full mt-4" onclick="checkExistingKey()">ตรวจสอบข้อมูล</button>
+
+    <div id="return-result" style="display:none;" class="mt-8">
+      <div class="divider">ผลลัพธ์</div>
+      
+      <div class="key-box mb-4">
+        <span id="return-key-val" class="font-mono">...</span>
+        <button class="btn-icon" onclick="copyReturnKey(this)">Copy</button>
+      </div>
+
+      <div id="return-status-badge" class="alert mb-6 text-center"></div>
+
+      <div class="grid-2">
+        <button class="btn btn-outline" id="opt-use-old" onclick="useOldKey()">ดูรายละเอียด</button>
+        <button class="btn btn-primary" id="opt-regen" onclick="regenKey()">สร้างใหม่</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: PREMIUM -->
+  <div class="page" id="page-premium">
+    <button class="btn-back" onclick="goTo('page-choose')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      กลับ
+    </button>
+
+    <h1 class="title">Premium Access</h1>
+    <p class="subtitle">ปลดล็อคการใช้งานถาวร ไม่ต้องผ่านภารกิจรายวัน</p>
+
+    <ul class="feature-list">
+      <li>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        ใช้งานได้ตลอดชีพ ไม่มีวันหมดอายุ
+      </li>
+      <li>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        ข้ามขั้นตอนการรอลิงก์ตลอดกาล
+      </li>
+      <li>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        Support โดยตรงจากแอดมิน WexZ
+      </li>
+    </ul>
+
+    <div class="alert" style="background:transparent; border-color:#333; font-size:12px;">
+      หมายเหตุ: คีย์ถาวรต้องทำการผูก HWID ผ่านแอดมินโดยตรงเพื่อความปลอดภัยของระบบ
+    </div>
+
+    <button class="btn btn-primary w-full mt-4" onclick="alert('กรุณาติดต่อแอดมินผ่านทาง Discord: WexZ Hub')">
+      ติดต่อแอดมิน (Discord)
+    </button>
+  </div>
+
+  <!-- Live Activity Monitor -->
+  <div class="monitor-card">
+    <div class="monitor-header">
+      <div class="monitor-title">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        Live Activity Monitor
+      </div>
+      <div class="conn-details">
+        <div class="conn-item"><div class="conn-led active"></div> DB: Online</div>
+        <div class="conn-item"><div class="conn-led active"></div> API: SSL</div>
+      </div>
+    </div>
+    <div class="log-container" id="activity-log"></div>
+  </div>
+
 </div>
 
 <script>
-// ══════════════════════════════════════════════════
-//  CONFIG — แก้ตรงนี้ให้ตรงกับ Supabase ของคุณ
-// ══════════════════════════════════════════════════
+// ==========================================
+// CONFIGURATION
+// ==========================================
 const CONFIG = {
-  SUPABASE_URL    : "https://srnregbpupnzihgwuskk.supabase.co",   // ← ใส่ Project URL
-  SUPABASE_ANON   : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNybnJlZ2JwdXBuemloZ3d1c2trIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwODMwMTgsImV4cCI6MjA5MzY1OTAxOH0.Z2e7Vh5heMKmyQdgQi3EFGEF1_ToYwkJwcmwoV9miG8",               // ← ใส่ anon key
-  TASK_LINK       : "https://work.ink/2tB2/RSQ-0fe41fb1-32bb-4f93-8804-a6ddd8a37f16",            // ← ใส่ลิงก์ task
-  TASK_WAIT_SEC   : 10,                                        // วินาทีรอก่อนนับว่าทำเสร็จ
+  SUPABASE_URL  : "https://srnregbpupnzihgwuskk.supabase.co",
+  SUPABASE_ANON : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNybnJlZ2JwdXBuemloZ3d1c2trIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwODMwMTgsImV4cCI6MjA5MzY1OTAxOH0.Z2e7Vh5heMKmyQdgQi3EFGEF1_ToYwkJwcmwoV9miG8",
+  TASK_LINK     : "https://work.ink/2tB2/RSQ-0fe41fb1-32bb-4f93-8804-a6ddd8a37f16",
+  TOKEN_KEY     : "wexz_verify_token",
 };
 
-// ══════════════════════════════════════════════════
-//  SUPABASE HELPERS
-// ══════════════════════════════════════════════════
 const SB_HEADERS = {
   "Content-Type" : "application/json",
   "apikey"       : CONFIG.SUPABASE_ANON,
   "Authorization": `Bearer ${CONFIG.SUPABASE_ANON}`,
+  "Prefer"       : "return=representation",
 };
 
+// ==========================================
+// ACTIVITY LOGGER
+// ==========================================
+function logAction(msg, type = "info") {
+  const log = document.getElementById("activity-log");
+  if (!log) return;
+  const now  = new Date();
+  const time = now.toTimeString().split(" ")[0];
+  const entry = document.createElement("div");
+  entry.className = "log-entry";
+  entry.innerHTML = `<span class="log-time">[${time}]</span><span class="log-msg ${type}">${msg}</span>`;
+  log.prepend(entry);
+  if (log.children.length > 20) log.lastElementChild.remove();
+}
+
+// ==========================================
+// TOKEN HELPERS
+// ==========================================
+function genToken() {
+  const rand = () => Math.random().toString(36).slice(2);
+  return rand() + rand() + Date.now().toString(36);
+}
+
+function buildCallbackURL(token) {
+  const base = window.location.href.split("?")[0];
+  return `${base}?verified=${encodeURIComponent(token)}`;
+}
+
+// ==========================================
+// BOOT — ตรวจสอบ callback จาก work.ink
+// ==========================================
+const verifyChannel = new BroadcastChannel("wexz_verify");
+
+window.addEventListener("DOMContentLoaded", async () => {
+  const params   = new URLSearchParams(window.location.search);
+  const incoming = params.get("verified");
+
+  // ── กรณีนี้คือแท็บ callback (แท็บใหม่ที่ work.ink redirect กลับมา) ──
+  if (incoming) {
+    history.replaceState({}, "", window.location.pathname);
+    const stored = localStorage.getItem(CONFIG.TOKEN_KEY);
+
+    // ตรวจสอบ localStorage ก่อน (ป้องกันคนพิมพ์ URL เอง)
+    if (!stored || incoming !== stored) {
+      verifyChannel.postMessage({ type: "FAILED" });
+      localStorage.removeItem(CONFIG.TOKEN_KEY);
+      setTimeout(() => window.close(), 400);
+      return;
+    }
+
+    // ② ตรวจสอบกับ Supabase ว่า token นี้มีอยู่จริงและยังไม่ถูกใช้
+    try {
+      const rows = await (async () => {
+        const url = `${CONFIG.SUPABASE_URL}/rest/v1/verify_tokens?token=eq.${encodeURIComponent(incoming)}&verified=eq.false&used=eq.false&limit=1`;
+        const res = await fetch(url, { method: "GET", headers: SB_HEADERS });
+        if (!res.ok) throw new Error("DB check failed");
+        return res.json();
+      })();
+
+      if (!rows || rows.length === 0 || new Date(rows[0].expires_at) < new Date()) {
+        // Token ไม่มีในDB หรือหมดอายุ
+        verifyChannel.postMessage({ type: "FAILED" });
+        localStorage.removeItem(CONFIG.TOKEN_KEY);
+        setTimeout(() => window.close(), 400);
+        return;
+      }
+
+      // ③ Mark verified=true ใน Supabase
+      const patchURL = `${CONFIG.SUPABASE_URL}/rest/v1/verify_tokens?token=eq.${encodeURIComponent(incoming)}`;
+      await fetch(patchURL, {
+        method : "PATCH",
+        headers: SB_HEADERS,
+        body   : JSON.stringify({ verified: true }),
+      });
+
+      // ④ ส่งสัญญาณสำเร็จไปแท็บหลักพร้อม token
+      verifyChannel.postMessage({ type: "VERIFIED", token: incoming });
+      localStorage.removeItem(CONFIG.TOKEN_KEY);
+      setTimeout(() => window.close(), 400);
+
+    } catch {
+      verifyChannel.postMessage({ type: "FAILED" });
+      localStorage.removeItem(CONFIG.TOKEN_KEY);
+      setTimeout(() => window.close(), 400);
+    }
+    return;
+  }
+
+  // ── กรณีปกติ: แท็บหลัก ──
+  logAction("System initialized. Secure Gateway active.", "success");
+
+  // ฟัง BroadcastChannel จากแท็บ callback
+  verifyChannel.onmessage = (event) => {
+    if (event.data.type === "VERIFIED") {
+      logAction("Gateway verification successful.", "success");
+      taskDone      = true;
+      verifiedToken = event.data.token; // เก็บ token สำหรับ server-side check ตอนสร้างคีย์
+
+      const box    = document.getElementById("task-box-1");
+      const status = document.getElementById("task-status-1");
+      if (box)    { box.classList.remove("waiting"); box.classList.add("done"); }
+      if (status) status.textContent = "สำเร็จ";
+      document.getElementById("btn-gen").disabled = false;
+
+      const alertBox = document.getElementById("task-alert");
+      alertBox.style.display = "block";
+      alertBox.className     = "alert success";
+      alertBox.textContent   = "ยืนยันสำเร็จ! สามารถดำเนินการต่อได้เลย";
+    } else if (event.data.type === "FAILED") {
+      logAction("Token mismatch or session expired. Verification failed.", "error");
+
+      const box    = document.getElementById("task-box-1");
+      const status = document.getElementById("task-status-1");
+      if (box)    { box.classList.remove("waiting"); }
+      if (status) status.textContent = "เริ่มเลย";
+
+      const alertBox = document.getElementById("task-alert");
+      alertBox.style.display = "block";
+      alertBox.className     = "alert error";
+      alertBox.textContent   = "ไม่สามารถยืนยันได้ โปรดทำภารกิจใหม่อีกครั้ง";
+    }
+  };
+});
+
+// ==========================================
+// REAL SUPABASE FUNCTIONS
+// ==========================================
 async function sb_get(table, filter) {
-  const url = `${CONFIG.SUPABASE_URL}/rest/v1/${table}?${filter}&select=*`;
-  const r = await fetch(url, { headers: SB_HEADERS });
-  return r.json();
+  const url = `${CONFIG.SUPABASE_URL}/rest/v1/${table}?${filter}&limit=1`;
+  const res  = await fetch(url, { method: "GET", headers: SB_HEADERS });
+  if (!res.ok) throw new Error(`DB error: ${res.status}`);
+  return res.json();
 }
 
 async function sb_insert(table, body) {
-  const r = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/${table}`, {
-    method: "POST",
-    headers: { ...SB_HEADERS, "Prefer": "return=representation" },
-    body: JSON.stringify(body),
+  const url = `${CONFIG.SUPABASE_URL}/rest/v1/${table}`;
+  const res  = await fetch(url, {
+    method : "POST",
+    headers: SB_HEADERS,
+    body   : JSON.stringify(body),
   });
-  return r.json();
+  if (!res.ok) throw new Error(`DB insert error: ${res.status}`);
+  return res.json();
 }
 
 async function sb_update(table, filter, body) {
   const url = `${CONFIG.SUPABASE_URL}/rest/v1/${table}?${filter}`;
-  const r = await fetch(url, {
-    method: "PATCH",
-    headers: { ...SB_HEADERS, "Prefer": "return=representation" },
-    body: JSON.stringify(body),
+  const res  = await fetch(url, {
+    method : "PATCH",
+    headers: SB_HEADERS,
+    body   : JSON.stringify(body),
   });
-  return r.json();
+  if (!res.ok) throw new Error(`DB update error: ${res.status}`);
+  return res.json();
 }
 
 async function sb_delete(table, filter) {
   const url = `${CONFIG.SUPABASE_URL}/rest/v1/${table}?${filter}`;
-  await fetch(url, { method: "DELETE", headers: SB_HEADERS });
+  const res  = await fetch(url, { method: "DELETE", headers: SB_HEADERS });
+  if (!res.ok) throw new Error(`DB delete error: ${res.status}`);
 }
 
-// ══════════════════════════════════════════════════
-//  KEY GENERATOR
-// ══════════════════════════════════════════════════
+// ==========================================
+// APP STATE & NAVIGATION
+// ==========================================
+let taskDone       = false;
+let verifiedToken  = null;   // token ที่ผ่าน server-side แล้ว — ต้องใช้ตอนสร้างคีย์
+let countdownTimer = null;
+let returnKeyData  = null;
+
 function genKey() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  const seg = n => Array.from({length:n}, ()=>chars[Math.floor(Math.random()*chars.length)]).join('');
-  return `WEXZ-${seg(4)}-${seg(4)}-${seg(4)}-${seg(4)}`;
+  const seg = n => Array.from({ length: n }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+  return `WEXZ-${seg(4)}-${seg(4)}-${seg(4)}`;
 }
 
-// ══════════════════════════════════════════════════
-//  NAVIGATION
-// ══════════════════════════════════════════════════
 function goTo(pageId) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
   const target = document.getElementById(pageId);
-  target.classList.add('active');
+  if (target) target.classList.add("active");
+
+  document.querySelectorAll(".alert").forEach(a => {
+    if (a.id === "task-alert") {
+      a.style.display = "none";
+    } else if (!a.classList.contains("success") && !a.classList.contains("error")) {
+      a.innerHTML = "";
+    }
+  });
 }
 
 function selectPlan(plan) {
-  if (plan === 'free')    goTo('page-task');
-  if (plan === 'premium') goTo('page-premium');
+  if (plan === "free")    goTo("page-task");
+  if (plan === "premium") goTo("page-premium");
 }
 
-// ══════════════════════════════════════════════════
-//  TASK FLOW
-// ══════════════════════════════════════════════════
-let taskDone = false;
-let taskTimer = null;
+// ==========================================
+// TASK — เปิด work.ink พร้อม callback token
+// ==========================================
+async function startTask() {
+  if (taskDone) return;
 
-function completeTask(n) {
-  const box    = document.getElementById(`task-box-${n}`);
-  const num    = document.getElementById(`task-num-${n}`);
-  const status = document.getElementById(`task-status-${n}`);
+  const box      = document.getElementById("task-box-1");
+  const status   = document.getElementById("task-status-1");
+  const alertBox = document.getElementById("task-alert");
 
-  // open link
-  window.open(CONFIG.TASK_LINK, '_blank');
+  // แสดง loading ก่อน
+  box.classList.add("waiting");
+  status.textContent     = "กำลังโหลด...";
+  alertBox.style.display = "block";
+  alertBox.className     = "alert";
+  alertBox.innerHTML     = '<span class="spinner" style="border-color:rgba(255,255,255,.2);border-top-color:#fff;"></span>&nbsp; กำลังสร้าง session...';
 
-  // start countdown
-  let sec = CONFIG.TASK_WAIT_SEC;
-  status.textContent = `รอ ${sec}s...`;
-  if (taskTimer) clearInterval(taskTimer);
+  try {
+    // ① สร้าง token และบันทึกลง Supabase ก่อน — ไม่มีในDB = ไม่ผ่าน
+    const token     = genToken();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // หมดอายุใน 10 นาที
 
-  taskTimer = setInterval(() => {
-    sec--;
-    status.textContent = `รอ ${sec}s...`;
-    if (sec <= 0) {
-      clearInterval(taskTimer);
-      box.classList.add('done');
-      num.textContent = '✓';
-      status.textContent = 'เสร็จแล้ว';
-      taskDone = true;
-      document.getElementById('btn-gen').disabled = false;
-      document.getElementById('task-alert').className = 'alert alert-success';
-      document.getElementById('task-alert').textContent = '✅ Task เสร็จแล้ว! กด "สร้างคีย์ฟรี" ได้เลย';
-    }
-  }, 1000);
+    await sb_insert("verify_tokens", {
+      token,
+      created_at : new Date().toISOString(),
+      expires_at : expiresAt,
+      verified   : false,
+      used       : false,
+    });
+
+    // ② เก็บ token ใน localStorage สำหรับ callback tab
+    localStorage.setItem(CONFIG.TOKEN_KEY, token);
+    const callbackURL = buildCallbackURL(token);
+
+    logAction("Verification session created. Opening gateway...", "info");
+
+    status.textContent  = "กำลังรอ...";
+    alertBox.innerHTML  = '<span class="spinner" style="border-color:rgba(255,255,255,.2);border-top-color:#fff;"></span>&nbsp; ทำตามขั้นตอนในแท็บใหม่จนเสร็จ — ระบบจะยืนยันอัตโนมัติ';
+
+    // ③ เปิดแท็บใหม่ไป work.ink
+    window.open(`${CONFIG.TASK_LINK}?r=${encodeURIComponent(callbackURL)}`, "_blank");
+
+  } catch (e) {
+    logAction(`Session creation failed: ${e.message}`, "error");
+    box.classList.remove("waiting");
+    status.textContent     = "เริ่มเลย";
+    alertBox.style.display = "block";
+    alertBox.className     = "alert error";
+    alertBox.textContent   = `ไม่สามารถสร้าง session ได้: ${e.message}`;
+  }
 }
 
 function goToGenerate() {
   if (!taskDone) return;
-  goTo('page-generate');
+  goTo("page-generate");
 }
 
-// ══════════════════════════════════════════════════
-//  CREATE FREE KEY
-// ══════════════════════════════════════════════════
+// ==========================================
+// CREATE FREE KEY
+// ต้องมี verifiedToken ที่ผ่าน server-side ก่อนเสมอ
+// ==========================================
 async function createFreeKey() {
-  const hwid = document.getElementById('hwid-input').value.trim();
-  const alertEl = document.getElementById('gen-alert');
-  const btn = document.getElementById('btn-create-key');
+  const hwid    = document.getElementById("hwid-input").value.trim();
+  const alertEl = document.getElementById("gen-alert");
+  const btn     = document.getElementById("btn-create-key");
 
   if (!hwid || hwid.length < 8) {
-    alertEl.innerHTML = '<div class="alert alert-error">⚠️ กรุณาใส่ HWID ให้ถูกต้อง</div>';
+    logAction("Key generation failed: Invalid HWID format.", "error");
+    alertEl.innerHTML = '<div class="alert error">ข้อผิดพลาด: โปรดระบุ HWID ให้ถูกต้อง</div>';
     return;
   }
 
-  // loading state
-  btn.innerHTML = '<span class="spinner"></span> กำลังสร้างคีย์...';
-  btn.disabled = true;
-  alertEl.innerHTML = '';
+  // ④ ตรวจสอบ verifiedToken อีกครั้งฝั่ง server ก่อนออกคีย์
+  if (!verifiedToken) {
+    logAction("Key generation blocked: No verified session.", "error");
+    alertEl.innerHTML = '<div class="alert error">ข้อผิดพลาด: ไม่พบ session ที่ผ่านการยืนยัน โปรดทำภารกิจก่อน</div>';
+    return;
+  }
+
+  logAction(`Initiating key generation for HWID: ${hwid.substring(0, 8)}...`, "info");
+  btn.innerHTML = '<span class="spinner"></span>&nbsp;กำลังตรวจสอบ...';
+  btn.disabled  = true;
+  alertEl.innerHTML = "";
 
   try {
-    // check if HWID already has a key
-    const existing = await sb_get('keys', `hwid=eq.${encodeURIComponent(hwid)}`);
+    // ⑤ ดึง token จาก Supabase — ต้อง verified=true และ used=false
+    logAction("Validating server-side verification token...", "info");
+    const tokenRows = await sb_get(
+      "verify_tokens",
+      `token=eq.${encodeURIComponent(verifiedToken)}&verified=eq.true&used=eq.false`
+    );
 
-    if (existing && existing.length > 0) {
-      const row = existing[0];
-      const now = new Date();
-      const exp = new Date(row.expires_at);
-
-      if (row.is_permanent || exp > now) {
-        // key still valid
-        alertEl.innerHTML = `<div class="alert alert-warn">⚠️ HWID นี้มีคีย์อยู่แล้วและยังไม่หมดอายุ — กลับไปหน้าเช็คคีย์เดิมแทน</div>`;
-        btn.innerHTML = '✦ สร้างคีย์';
-        btn.disabled = false;
-        return;
-      }
-
-      // expired key — delete and regenerate
-      await sb_delete('keys', `hwid=eq.${encodeURIComponent(hwid)}`);
+    if (!tokenRows || tokenRows.length === 0) {
+      throw new Error("ไม่พบ session ที่ถูกต้อง โปรดทำภารกิจใหม่");
     }
 
-    // create new key
-    const newKey    = genKey();
-    const now       = new Date();
-    const expiresAt = new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString();
+    // ตรวจสอบว่าไม่หมดอายุ
+    const tokenRow = tokenRows[0];
+    if (new Date(tokenRow.expires_at) < new Date()) {
+      throw new Error("Session หมดอายุแล้ว โปรดทำภารกิจใหม่");
+    }
 
-    await sb_insert('keys', {
+    // ⑥ Mark token เป็น used=true ทันที (ป้องกัน replay)
+    await sb_update(
+      "verify_tokens",
+      `token=eq.${encodeURIComponent(verifiedToken)}`,
+      { used: true }
+    );
+    logAction("Token consumed. Generating key...", "info");
+
+    // ⑦ ตรวจสอบคีย์เก่าของ HWID นี้
+    const existing = await sb_get("keys", `hwid=eq.${encodeURIComponent(hwid)}`);
+    if (existing && existing.length > 0) {
+      const row = existing[0];
+      const exp = row.expires_at ? new Date(row.expires_at) : null;
+      if (row.is_permanent || (exp && exp > new Date())) {
+        alertEl.innerHTML = '<div class="alert">HWID นี้มีคีย์ที่ยังใช้งานได้อยู่ โปรดใช้เมนู "ตรวจสอบคีย์เดิม"</div>';
+        btn.innerHTML = "สร้างคีย์ 24 ชั่วโมง";
+        btn.disabled  = false;
+        return;
+      }
+      await sb_delete("keys", `hwid=eq.${encodeURIComponent(hwid)}`);
+      logAction("Expired key removed.", "info");
+    }
+
+    // ⑧ สร้างคีย์ใหม่
+    const newKey    = genKey();
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+    await sb_insert("keys", {
       key          : newKey,
-      hwid         : hwid,
+      hwid,
       is_permanent : false,
       expires_at   : expiresAt,
-      created_at   : now.toISOString(),
+      created_at   : new Date().toISOString(),
     });
 
-    // show result
+    verifiedToken = null; // ล้าง token หลังใช้
+    logAction(`Key issued for HWID: ${hwid.substring(0, 8)}...`, "success");
     showKeyResult(newKey, false, expiresAt);
+    btn.innerHTML = "สร้างคีย์ 24 ชั่วโมง";
+    btn.disabled  = false;
 
   } catch (e) {
-    alertEl.innerHTML = `<div class="alert alert-error">❌ เกิดข้อผิดพลาด: ${e.message}</div>`;
-    btn.innerHTML = '✦ สร้างคีย์';
-    btn.disabled = false;
+    logAction(`Key generation error: ${e.message}`, "error");
+    alertEl.innerHTML = `<div class="alert error">ข้อผิดพลาด: ${e.message}</div>`;
+    btn.innerHTML = "สร้างคีย์ 24 ชั่วโมง";
+    btn.disabled  = false;
   }
 }
 
-// ══════════════════════════════════════════════════
-//  CHECK EXISTING KEY
-// ══════════════════════════════════════════════════
-let returnKeyData = null;
-
+// ==========================================
+// CHECK / RETURN KEY
+// [BUG FIX #3] เดิมคืน mock data เมื่อไม่พบ แก้เป็นแสดง "ไม่พบ" จริงๆ
+// ==========================================
 async function checkExistingKey() {
-  const hwid    = document.getElementById('return-hwid').value.trim();
-  const alertEl = document.getElementById('return-alert');
-  const result  = document.getElementById('return-result');
+  const hwid    = document.getElementById("return-hwid").value.trim();
+  const alertEl = document.getElementById("return-alert");
+  const result  = document.getElementById("return-result");
 
   if (!hwid || hwid.length < 8) {
-    alertEl.innerHTML = '<div class="alert alert-error">⚠️ กรุณาใส่ HWID ให้ถูกต้อง</div>';
+    logAction("Lookup failed: Invalid HWID format.", "error");
+    alertEl.innerHTML = '<div class="alert error">ข้อผิดพลาด: โปรดระบุ HWID ให้ถูกต้อง</div>';
     return;
   }
 
-  alertEl.innerHTML = '<div class="alert alert-info"><span class="spinner"></span> กำลังตรวจสอบ...</div>';
-  result.style.display = 'none';
+  logAction(`Searching license database for HWID: ${hwid.substring(0, 8)}...`, "info");
+  alertEl.innerHTML    = '<div class="alert"><span class="spinner"></span>&nbsp;กำลังตรวจสอบฐานข้อมูล...</div>';
+  result.style.display = "none";
 
   try {
-    const rows = await sb_get('keys', `hwid=eq.${encodeURIComponent(hwid)}`);
+    const rows = await sb_get("keys", `hwid=eq.${encodeURIComponent(hwid)}`);
 
+    // รีเซ็ต visibility ของปุ่มก่อนแสดงผล
+    document.getElementById("opt-use-old").style.display = "inline-flex";
+    document.getElementById("opt-regen").style.display   = "inline-flex";
+
+    // [BUG FIX #3] ถ้าไม่พบให้แจ้งเลย ไม่ใช่สร้าง mock data
     if (!rows || rows.length === 0) {
-      alertEl.innerHTML = '<div class="alert alert-warn">⚠️ ไม่พบคีย์สำหรับ HWID นี้ — กลับไปสร้างคีย์ใหม่</div>';
+      alertEl.innerHTML = '<div class="alert error">ไม่พบข้อมูลคีย์สำหรับ HWID นี้ โปรดสร้างคีย์ใหม่</div>';
+      logAction("No license record found for this HWID.", "error");
       return;
     }
 
-    const row = rows[0];
-    const now = new Date();
-    const exp = row.expires_at ? new Date(row.expires_at) : null;
+    const row     = rows[0];
+    const now     = new Date();
+    const exp     = row.expires_at ? new Date(row.expires_at) : null;
     const isValid = row.is_permanent || (exp && exp > now);
 
     returnKeyData = row;
+    document.getElementById("return-key-val").textContent = row.key;
 
-    document.getElementById('return-key-val').textContent = row.key;
-
-    const badge = document.getElementById('return-status-badge');
+    const badge = document.getElementById("return-status-badge");
     if (row.is_permanent) {
-      badge.className = 'alert alert-success';
-      badge.textContent = '✅ คีย์ถาวร — ยังใช้งานได้';
-      document.getElementById('opt-regen').style.display = 'none';
+      badge.className = "alert success text-center";
+      badge.innerHTML = 'สถานะ: <strong>คีย์ถาวร (Permanent)</strong>';
+      document.getElementById("opt-regen").style.display = "none";
     } else if (isValid) {
       const remaining = Math.floor((exp - now) / 1000);
-      const h = Math.floor(remaining/3600);
-      const m = Math.floor((remaining%3600)/60);
-      badge.className = 'alert alert-success';
-      badge.textContent = `✅ คีย์ยังใช้ได้ — เหลือ ${h}h ${m}m`;
-      document.getElementById('opt-regen').style.display = 'flex';
+      const h = Math.floor(remaining / 3600);
+      const m = Math.floor((remaining % 3600) / 60);
+      badge.className = "alert success text-center";
+      badge.innerHTML = `สถานะ: <strong>ใช้งานได้ (เหลือ ${h} ชม. ${m} นาที)</strong>`;
     } else {
-      badge.className = 'alert alert-error';
-      badge.textContent = '❌ คีย์หมดอายุแล้ว — ต้องสร้างใหม่';
-      document.getElementById('opt-use-old').style.display = 'none';
+      badge.className = "alert error text-center";
+      badge.innerHTML = 'สถานะ: <strong>คีย์หมดอายุแล้ว</strong>';
+      document.getElementById("opt-use-old").style.display = "none";
     }
 
-    alertEl.innerHTML = '';
-    result.style.display = 'block';
+    logAction(`License record found. Status: ${isValid ? "Valid" : "Expired"}`, isValid ? "success" : "error");
+    alertEl.innerHTML    = "";
+    result.style.display = "block";
 
   } catch (e) {
-    alertEl.innerHTML = `<div class="alert alert-error">❌ เกิดข้อผิดพลาด: ${e.message}</div>`;
+    logAction(`Lookup error: ${e.message}`, "error");
+    alertEl.innerHTML = `<div class="alert error">ข้อผิดพลาด: ${e.message}</div>`;
   }
 }
 
 function useOldKey() {
   if (!returnKeyData) return;
-  if (returnKeyData.is_permanent) {
-    showKeyResult(returnKeyData.key, true, null);
-  } else {
-    showKeyResult(returnKeyData.key, false, returnKeyData.expires_at);
-  }
+  showKeyResult(returnKeyData.key, returnKeyData.is_permanent, returnKeyData.expires_at);
 }
 
 function regenKey() {
-  // reset task state and go to task page
   taskDone = false;
-  document.getElementById('task-box-1').classList.remove('done');
-  document.getElementById('task-num-1').textContent = '1';
-  document.getElementById('task-status-1').textContent = 'กด →';
-  document.getElementById('btn-gen').disabled = true;
-  document.getElementById('task-alert').className = 'alert alert-info';
-  document.getElementById('task-alert').textContent = '⚡ กด task ด้านบนก่อน จึงจะสร้างคีย์ได้';
-  // pre-fill hwid from return page
-  if (returnKeyData) {
-    document.getElementById('hwid-input').value = returnKeyData.hwid;
-  }
-  goTo('page-task');
+  const status = document.getElementById("task-status-1");
+  const box    = document.getElementById("task-box-1");
+  if (status) status.textContent = "เริ่มเลย";
+  if (box)    { box.classList.remove("done"); box.classList.remove("waiting"); }
+  document.getElementById("btn-gen").disabled = true;
+  goTo("page-task");
 }
 
-// ══════════════════════════════════════════════════
-//  SHOW KEY RESULT + TIMER
-// ══════════════════════════════════════════════════
-let countdownInterval = null;
-
+// ==========================================
+// KEY RESULT DISPLAY
+// ==========================================
 function showKeyResult(key, isPermanent, expiresAt) {
-  document.getElementById('result-key').textContent = key;
-
-  const badge = document.getElementById('key-type-badge');
-  const timerSec = document.getElementById('timer-section');
+  document.getElementById("result-key").textContent = key;
+  const badge        = document.getElementById("key-type-badge");
+  const timerSection = document.getElementById("timer-section");
+  const typeKicker   = document.getElementById("key-type-kicker");
 
   if (isPermanent) {
-    badge.className = 'alert alert-warn';
-    badge.textContent = '👑 คีย์ถาวร — ไม่มีวันหมดอายุ';
-    timerSec.style.display = 'none';
+    typeKicker.textContent     = "Permanent Key";
+    badge.innerHTML            = "<strong>การเข้าถึงแบบถาวร</strong>";
+    timerSection.style.display = "none";
   } else {
-    badge.className = 'alert alert-success';
-    badge.textContent = '⏱️ คีย์ฟรี — หมดอายุใน 24 ชั่วโมง';
-    timerSec.style.display = 'block';
-    startCountdown(new Date(expiresAt));
+    typeKicker.textContent     = "Free Key";
+    badge.innerHTML            = 'การเข้าถึงแบบ <strong>24 ชั่วโมง</strong>';
+    timerSection.style.display = "block";
+    startCountdown(expiresAt);
   }
 
-  goTo('page-key');
+  goTo("page-key");
 }
 
-function startCountdown(expDate) {
-  if (countdownInterval) clearInterval(countdownInterval);
+function startCountdown(expiresAt) {
+  if (countdownTimer) clearInterval(countdownTimer);
+  const end = new Date(expiresAt).getTime();
 
-  function update() {
-    const now  = new Date();
-    const diff = Math.max(0, Math.floor((expDate - now) / 1000));
-    const h    = Math.floor(diff / 3600);
-    const m    = Math.floor((diff % 3600) / 60);
-    const s    = diff % 60;
-    document.getElementById('countdown').textContent =
-      `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-    const pct = (diff / 86400) * 100;
-    document.getElementById('timer-bar').style.width = pct + '%';
-    if (diff <= 0) clearInterval(countdownInterval);
+  function tick() {
+    const diff = Math.max(0, end - Date.now());
+    const h = Math.floor(diff / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    document.getElementById("countdown").textContent =
+      `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    if (diff === 0) clearInterval(countdownTimer);
   }
 
-  update();
-  countdownInterval = setInterval(update, 1000);
+  tick();
+  countdownTimer = setInterval(tick, 1000);
 }
 
-// ══════════════════════════════════════════════════
-//  COPY HELPERS
-// ══════════════════════════════════════════════════
-function copyKey() {
-  const key = document.getElementById('result-key').textContent;
-  navigator.clipboard.writeText(key).catch(() => {});
-  const btn = document.getElementById('copy-key-btn');
-  btn.textContent = '✅';
-  btn.classList.add('copied');
-  setTimeout(() => { btn.textContent = '📋'; btn.classList.remove('copied'); }, 1400);
+// ==========================================
+// COPY HELPERS
+// ==========================================
+async function copyText(text, btn) {
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch {
+    const t = document.createElement("textarea");
+    t.value = text;
+    document.body.appendChild(t);
+    t.select();
+    document.execCommand("copy");
+    t.remove();
+  }
+  if (btn) {
+    btn.classList.add("copied");
+    btn.textContent = "Copied!";
+    setTimeout(() => { btn.classList.remove("copied"); btn.textContent = "Copy"; }, 1500);
+  }
 }
 
-function copyReturnKey() {
-  const key = document.getElementById('return-key-val').textContent;
-  navigator.clipboard.writeText(key).catch(() => {});
-}
-
-// ══════════════════════════════════════════════════
-//  FOOTER CLOCK
-// ══════════════════════════════════════════════════
-function updateClock() {
-  document.getElementById('footer-time').textContent =
-    new Date().toLocaleString('th-TH');
-}
-updateClock();
-setInterval(updateClock, 1000);
+function copyKey()          { copyText(document.getElementById("result-key").textContent,    document.getElementById("copy-key-btn")); }
+function copyReturnKey(btn) { copyText(document.getElementById("return-key-val").textContent, btn); }
 </script>
 </body>
 </html>
