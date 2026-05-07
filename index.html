@@ -413,75 +413,6 @@ body {
   0%, 100% { border-color: #333; }
   50%       { border-color: #666; }
 }
-
-/* Live Activity Monitor */
-.monitor-card {
-  margin-top: 32px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 16px;
-}
-
-.monitor-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--border);
-}
-
-.monitor-title {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.log-container {
-  max-height: 100px;
-  overflow-y: auto;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: #666;
-  line-height: 1.6;
-}
-
-.log-entry {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 4px;
-  animation: fadeIn 0.3s ease;
-}
-
-.log-time { color: #444; min-width: 55px; }
-.log-msg { color: #888; }
-.log-msg.success { color: #00ff88; }
-.log-msg.info { color: #fff; }
-.log-msg.error { color: #ff5555; }
-
-/* Scrollbar for log */
-.log-container::-webkit-scrollbar { width: 4px; }
-.log-container::-webkit-scrollbar-track { background: transparent; }
-.log-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
-
-/* Connection Details */
-.conn-details {
-  display: flex;
-  gap: 16px;
-  font-size: 10px;
-  color: var(--text-muted);
-  opacity: 0.6;
-}
-
-.conn-item { display: flex; align-items: center; gap: 4px; }
-.conn-led { width: 4px; height: 4px; border-radius: 50%; background: #444; }
-.conn-led.active { background: #00ff88; box-shadow: 0 0 4px #00ff88; }
 </style>
 </head>
 <body>
@@ -669,64 +600,36 @@ body {
     </button>
   </div>
 
-  <!-- Live Activity Monitor -->
-  <div class="monitor-card">
-    <div class="monitor-header">
-      <div class="monitor-title">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-        Live Activity Monitor
-      </div>
-      <div class="conn-details">
-        <div class="conn-item"><div class="conn-led active"></div> DB: Online</div>
-        <div class="conn-item"><div class="conn-led active"></div> API: SSL</div>
-      </div>
-    </div>
-    <div class="log-container" id="activity-log"></div>
-  </div>
-
 </div>
 
 <script>
 // ==========================================
-// CONFIGURATION
+// CONFIGURATION — แก้ค่านี้
 // ==========================================
 const CONFIG = {
   SUPABASE_URL  : "https://srnregbpupnzihgwuskk.supabase.co",
   SUPABASE_ANON : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNybnJlZ2JwdXBuemloZ3d1c2trIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwODMwMTgsImV4cCI6MjA5MzY1OTAxOH0.Z2e7Vh5heMKmyQdgQi3EFGEF1_ToYwkJwcmwoV9miG8",
   TASK_LINK     : "https://work.ink/2znB/wexz-key",
-  TOKEN_KEY     : "wexz_verify_token",
+  TOKEN_KEY:     "wexz_verify_token",          // sessionStorage key
 };
 
 const SB_HEADERS = {
-  "Content-Type" : "application/json",
-  "apikey"       : CONFIG.SUPABASE_ANON,
+  "Content-Type": "application/json",
+  "apikey": CONFIG.SUPABASE_ANON,
   "Authorization": `Bearer ${CONFIG.SUPABASE_ANON}`,
-  "Prefer"       : "return=representation",
 };
-
-// ==========================================
-// ACTIVITY LOGGER
-// ==========================================
-function logAction(msg, type = "info") {
-  const log = document.getElementById("activity-log");
-  if (!log) return;
-  const now  = new Date();
-  const time = now.toTimeString().split(" ")[0];
-  const entry = document.createElement("div");
-  entry.className = "log-entry";
-  entry.innerHTML = `<span class="log-time">[${time}]</span><span class="log-msg ${type}">${msg}</span>`;
-  log.prepend(entry);
-  if (log.children.length > 20) log.lastElementChild.remove();
-}
 
 // ==========================================
 // TOKEN HELPERS
 // ==========================================
+
+/** สร้าง random token สำหรับ session นี้ */
 function genToken() {
   const rand = () => Math.random().toString(36).slice(2);
   return rand() + rand() + Date.now().toString(36);
 }
 
+/** URL ที่ work.ink จะ redirect กลับมาพร้อม token */
 function buildCallbackURL(token) {
   const base = window.location.href.split("?")[0];
   return `${base}?verified=${encodeURIComponent(token)}`;
@@ -735,142 +638,57 @@ function buildCallbackURL(token) {
 // ==========================================
 // BOOT — ตรวจสอบ callback จาก work.ink
 // ==========================================
-const verifyChannel = new BroadcastChannel("wexz_verify");
-
-window.addEventListener("DOMContentLoaded", async () => {
-  const params   = new URLSearchParams(window.location.search);
+window.addEventListener("DOMContentLoaded", () => {
+  const params  = new URLSearchParams(window.location.search);
   const incoming = params.get("verified");
 
-  // ── กรณีนี้คือแท็บ callback (แท็บใหม่ที่ work.ink redirect กลับมา) ──
-  if (incoming) {
-    history.replaceState({}, "", window.location.pathname);
-    const stored = localStorage.getItem(CONFIG.TOKEN_KEY);
+  if (!incoming) return; // ไม่ใช่ callback — โหลดปกติ
 
-    // ตรวจสอบ localStorage ก่อน (ป้องกันคนพิมพ์ URL เอง)
-    if (!stored || incoming !== stored) {
-      verifyChannel.postMessage({ type: "FAILED" });
-      localStorage.removeItem(CONFIG.TOKEN_KEY);
-      setTimeout(() => window.close(), 400);
-      return;
-    }
+  // ลบ query string ออกจาก URL bar (ไม่ reload หน้า)
+  history.replaceState({}, "", window.location.pathname);
 
-    // ② ตรวจสอบกับ Supabase ว่า token นี้มีอยู่จริงและยังไม่ถูกใช้
-    try {
-      const rows = await (async () => {
-        const url = `${CONFIG.SUPABASE_URL}/rest/v1/verify_tokens?token=eq.${encodeURIComponent(incoming)}&verified=eq.false&used=eq.false&limit=1`;
-        const res = await fetch(url, { method: "GET", headers: SB_HEADERS });
-        if (!res.ok) throw new Error("DB check failed");
-        return res.json();
-      })();
+  const stored = sessionStorage.getItem(CONFIG.TOKEN_KEY);
 
-      if (!rows || rows.length === 0 || new Date(rows[0].expires_at) < new Date()) {
-        // Token ไม่มีในDB หรือหมดอายุ
-        verifyChannel.postMessage({ type: "FAILED" });
-        localStorage.removeItem(CONFIG.TOKEN_KEY);
-        setTimeout(() => window.close(), 400);
-        return;
-      }
+  if (stored && incoming === stored) {
+    // ✅ Token ตรง — ผู้ใช้ทำ work.ink เสร็จจริง
+    sessionStorage.removeItem(CONFIG.TOKEN_KEY);
+    taskDone = true;
 
-      // ③ Mark verified=true ใน Supabase
-      const patchURL = `${CONFIG.SUPABASE_URL}/rest/v1/verify_tokens?token=eq.${encodeURIComponent(incoming)}`;
-      await fetch(patchURL, {
-        method : "PATCH",
-        headers: SB_HEADERS,
-        body   : JSON.stringify({ verified: true }),
-      });
+    // อัปเดต UI ของ task card
+    const box    = document.getElementById("task-box-1");
+    const status = document.getElementById("task-status-1");
+    if (box)    box.classList.add("done");
+    if (status) status.textContent = "สำเร็จ";
+    document.getElementById("btn-gen").disabled = false;
 
-      // ④ ส่งสัญญาณสำเร็จไปแท็บหลักพร้อม token
-      verifyChannel.postMessage({ type: "VERIFIED", token: incoming });
-      localStorage.removeItem(CONFIG.TOKEN_KEY);
-      setTimeout(() => window.close(), 400);
+    const alertBox = document.getElementById("task-alert");
+    alertBox.style.display = "block";
+    alertBox.className     = "alert success";
+    alertBox.textContent   = "ยืนยันสำเร็จ! สามารถดำเนินการต่อได้เลย";
 
-    } catch {
-      verifyChannel.postMessage({ type: "FAILED" });
-      localStorage.removeItem(CONFIG.TOKEN_KEY);
-      setTimeout(() => window.close(), 400);
-    }
-    return;
+    goTo("page-task");   // แสดงหน้า task พร้อมปุ่มดำเนินการต่อ
+  } else {
+    // ❌ Token ไม่ตรง หรือไม่มี token เก็บไว้ — ไม่ยืนยัน
+    sessionStorage.removeItem(CONFIG.TOKEN_KEY);
+    goTo("page-task");
+    const alertBox = document.getElementById("task-alert");
+    alertBox.style.display = "block";
+    alertBox.className     = "alert error";
+    alertBox.textContent   = "ไม่สามารถยืนยันได้ โปรดทำภารกิจใหม่อีกครั้ง";
   }
-
-  // ── กรณีปกติ: แท็บหลัก ──
-  logAction("System initialized. Secure Gateway active.", "success");
-
-  // ฟัง BroadcastChannel จากแท็บ callback
-  verifyChannel.onmessage = (event) => {
-    if (event.data.type === "VERIFIED") {
-      logAction("Gateway verification successful.", "success");
-      taskDone      = true;
-      verifiedToken = event.data.token; // เก็บ token สำหรับ server-side check ตอนสร้างคีย์
-
-      const box    = document.getElementById("task-box-1");
-      const status = document.getElementById("task-status-1");
-      if (box)    { box.classList.remove("waiting"); box.classList.add("done"); }
-      if (status) status.textContent = "สำเร็จ";
-      document.getElementById("btn-gen").disabled = false;
-
-      const alertBox = document.getElementById("task-alert");
-      alertBox.style.display = "block";
-      alertBox.className     = "alert success";
-      alertBox.textContent   = "ยืนยันสำเร็จ! สามารถดำเนินการต่อได้เลย";
-    } else if (event.data.type === "FAILED") {
-      logAction("Token mismatch or session expired. Verification failed.", "error");
-
-      const box    = document.getElementById("task-box-1");
-      const status = document.getElementById("task-status-1");
-      if (box)    { box.classList.remove("waiting"); }
-      if (status) status.textContent = "เริ่มเลย";
-
-      const alertBox = document.getElementById("task-alert");
-      alertBox.style.display = "block";
-      alertBox.className     = "alert error";
-      alertBox.textContent   = "ไม่สามารถยืนยันได้ โปรดทำภารกิจใหม่อีกครั้ง";
-    }
-  };
 });
 
 // ==========================================
-// REAL SUPABASE FUNCTIONS
+// MOCK DATABASE FUNCTIONS
 // ==========================================
-async function sb_get(table, filter) {
-  const url = `${CONFIG.SUPABASE_URL}/rest/v1/${table}?${filter}&limit=1`;
-  const res  = await fetch(url, { method: "GET", headers: SB_HEADERS });
-  if (!res.ok) throw new Error(`DB error: ${res.status}`);
-  return res.json();
-}
-
-async function sb_insert(table, body) {
-  const url = `${CONFIG.SUPABASE_URL}/rest/v1/${table}`;
-  const res  = await fetch(url, {
-    method : "POST",
-    headers: SB_HEADERS,
-    body   : JSON.stringify(body),
-  });
-  if (!res.ok) throw new Error(`DB insert error: ${res.status}`);
-  return res.json();
-}
-
-async function sb_update(table, filter, body) {
-  const url = `${CONFIG.SUPABASE_URL}/rest/v1/${table}?${filter}`;
-  const res  = await fetch(url, {
-    method : "PATCH",
-    headers: SB_HEADERS,
-    body   : JSON.stringify(body),
-  });
-  if (!res.ok) throw new Error(`DB update error: ${res.status}`);
-  return res.json();
-}
-
-async function sb_delete(table, filter) {
-  const url = `${CONFIG.SUPABASE_URL}/rest/v1/${table}?${filter}`;
-  const res  = await fetch(url, { method: "DELETE", headers: SB_HEADERS });
-  if (!res.ok) throw new Error(`DB delete error: ${res.status}`);
-}
+async function sb_get(table, filter) { return []; }
+async function sb_insert(table, body) { return [body]; }
+async function sb_delete(table, filter) {}
 
 // ==========================================
 // APP STATE & NAVIGATION
 // ==========================================
-let taskDone       = false;
-let verifiedToken  = null;   // token ที่ผ่าน server-side แล้ว — ต้องใช้ตอนสร้างคีย์
+let taskDone = false;
 let countdownTimer = null;
 let returnKeyData  = null;
 
@@ -885,12 +703,9 @@ function goTo(pageId) {
   const target = document.getElementById(pageId);
   if (target) target.classList.add("active");
 
-  document.querySelectorAll(".alert").forEach(a => {
-    if (a.id === "task-alert") {
-      a.style.display = "none";
-    } else if (!a.classList.contains("success") && !a.classList.contains("error")) {
-      a.innerHTML = "";
-    }
+  document.querySelectorAll(".alert:not(.success):not(.error)").forEach(a => {
+    if (a.id !== "task-alert") a.innerHTML = "";
+    if (a.id === "task-alert") a.style.display = "none";
   });
 }
 
@@ -902,53 +717,36 @@ function selectPlan(plan) {
 // ==========================================
 // TASK — เปิด work.ink พร้อม callback token
 // ==========================================
-async function startTask() {
-  if (taskDone) return;
 
-  const box      = document.getElementById("task-box-1");
-  const status   = document.getElementById("task-status-1");
+/**
+ * เรียกเมื่อผู้ใช้กดการ์ด "Work.ink Support"
+ * — สร้าง token → เก็บใน sessionStorage → redirect ไป work.ink
+ *   พร้อมแนบ ?r=CALLBACK_URL ให้ work.ink redirect กลับเมื่อเสร็จ
+ */
+function startTask() {
+  if (taskDone) return; // ถ้าทำแล้วไม่ต้องทำซ้ำ
+
+  const box    = document.getElementById("task-box-1");
+  const status = document.getElementById("task-status-1");
   const alertBox = document.getElementById("task-alert");
 
-  // แสดง loading ก่อน
+  // สร้างและเก็บ token
+  const token = genToken();
+  sessionStorage.setItem(CONFIG.TOKEN_KEY, token);
+
+  // สร้าง callback URL ที่จะส่งให้ work.ink
+  const callbackURL = buildCallbackURL(token);
+
+  // อัปเดต UI เป็น "กำลังรอ..."
   box.classList.add("waiting");
-  status.textContent     = "กำลังโหลด...";
-  alertBox.style.display = "block";
-  alertBox.className     = "alert";
-  alertBox.innerHTML     = '<span class="spinner" style="border-color:rgba(255,255,255,.2);border-top-color:#fff;"></span>&nbsp; กำลังสร้าง session...';
+  status.textContent = "กำลังรอ...";
+  alertBox.style.display  = "block";
+  alertBox.className      = "alert";
+  alertBox.innerHTML      = '<span class="spinner" style="border-color:rgba(255,255,255,.2);border-top-color:#fff;"></span>&nbsp; กำลังเปิดลิงก์... ทำตามขั้นตอนจนเสร็จแล้วระบบจะยืนยันอัตโนมัติ';
 
-  try {
-    // ① สร้าง token และบันทึกลง Supabase ก่อน — ไม่มีในDB = ไม่ผ่าน
-    const token     = genToken();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // หมดอายุใน 10 นาที
-
-    await sb_insert("verify_tokens", {
-      token,
-      created_at : new Date().toISOString(),
-      expires_at : expiresAt,
-      verified   : false,
-      used       : false,
-    });
-
-    // ② เก็บ token ใน localStorage สำหรับ callback tab
-    localStorage.setItem(CONFIG.TOKEN_KEY, token);
-    const callbackURL = buildCallbackURL(token);
-
-    logAction("Verification session created. Opening gateway...", "info");
-
-    status.textContent  = "กำลังรอ...";
-    alertBox.innerHTML  = '<span class="spinner" style="border-color:rgba(255,255,255,.2);border-top-color:#fff;"></span>&nbsp; ทำตามขั้นตอนในแท็บใหม่จนเสร็จ — ระบบจะยืนยันอัตโนมัติ';
-
-    // ③ เปิดแท็บใหม่ไป work.ink
-    window.open(`${CONFIG.TASK_LINK}?r=${encodeURIComponent(callbackURL)}`, "_blank");
-
-  } catch (e) {
-    logAction(`Session creation failed: ${e.message}`, "error");
-    box.classList.remove("waiting");
-    status.textContent     = "เริ่มเลย";
-    alertBox.style.display = "block";
-    alertBox.className     = "alert error";
-    alertBox.textContent   = `ไม่สามารถสร้าง session ได้: ${e.message}`;
-  }
+  // เปิด work.ink พร้อม ?r= callback
+  // work.ink จะ redirect กลับมาที่ callbackURL เมื่อผู้ใช้ทำครบ
+  window.location.href = `${CONFIG.TASK_LINK}?r=${encodeURIComponent(callbackURL)}`;
 }
 
 function goToGenerate() {
@@ -958,7 +756,6 @@ function goToGenerate() {
 
 // ==========================================
 // CREATE FREE KEY
-// ต้องมี verifiedToken ที่ผ่าน server-side ก่อนเสมอ
 // ==========================================
 async function createFreeKey() {
   const hwid    = document.getElementById("hwid-input").value.trim();
@@ -966,84 +763,50 @@ async function createFreeKey() {
   const btn     = document.getElementById("btn-create-key");
 
   if (!hwid || hwid.length < 8) {
-    logAction("Key generation failed: Invalid HWID format.", "error");
     alertEl.innerHTML = '<div class="alert error">ข้อผิดพลาด: โปรดระบุ HWID ให้ถูกต้อง</div>';
     return;
   }
 
-  // ④ ตรวจสอบ verifiedToken อีกครั้งฝั่ง server ก่อนออกคีย์
-  if (!verifiedToken) {
-    logAction("Key generation blocked: No verified session.", "error");
-    alertEl.innerHTML = '<div class="alert error">ข้อผิดพลาด: ไม่พบ session ที่ผ่านการยืนยัน โปรดทำภารกิจก่อน</div>';
-    return;
-  }
-
-  logAction(`Initiating key generation for HWID: ${hwid.substring(0, 8)}...`, "info");
-  btn.innerHTML = '<span class="spinner"></span>&nbsp;กำลังตรวจสอบ...';
+  btn.innerHTML = '<span class="spinner"></span>&nbsp;กำลังสร้างคีย์...';
   btn.disabled  = true;
   alertEl.innerHTML = "";
 
   try {
-    // ⑤ ดึง token จาก Supabase — ต้อง verified=true และ used=false
-    logAction("Validating server-side verification token...", "info");
-    const tokenRows = await sb_get(
-      "verify_tokens",
-      `token=eq.${encodeURIComponent(verifiedToken)}&verified=eq.true&used=eq.false`
-    );
-
-    if (!tokenRows || tokenRows.length === 0) {
-      throw new Error("ไม่พบ session ที่ถูกต้อง โปรดทำภารกิจใหม่");
-    }
-
-    // ตรวจสอบว่าไม่หมดอายุ
-    const tokenRow = tokenRows[0];
-    if (new Date(tokenRow.expires_at) < new Date()) {
-      throw new Error("Session หมดอายุแล้ว โปรดทำภารกิจใหม่");
-    }
-
-    // ⑥ Mark token เป็น used=true ทันที (ป้องกัน replay)
-    await sb_update(
-      "verify_tokens",
-      `token=eq.${encodeURIComponent(verifiedToken)}`,
-      { used: true }
-    );
-    logAction("Token consumed. Generating key...", "info");
-
-    // ⑦ ตรวจสอบคีย์เก่าของ HWID นี้
     const existing = await sb_get("keys", `hwid=eq.${encodeURIComponent(hwid)}`);
+
     if (existing && existing.length > 0) {
       const row = existing[0];
+      const now = new Date();
       const exp = row.expires_at ? new Date(row.expires_at) : null;
-      if (row.is_permanent || (exp && exp > new Date())) {
+
+      if (row.is_permanent || (exp && exp > now)) {
         alertEl.innerHTML = '<div class="alert">HWID นี้มีคีย์ที่ยังใช้งานได้อยู่ โปรดใช้เมนู "ตรวจสอบคีย์เดิม"</div>';
         btn.innerHTML = "สร้างคีย์ 24 ชั่วโมง";
         btn.disabled  = false;
         return;
       }
       await sb_delete("keys", `hwid=eq.${encodeURIComponent(hwid)}`);
-      logAction("Expired key removed.", "info");
     }
 
-    // ⑧ สร้างคีย์ใหม่
-    const newKey    = genKey();
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    setTimeout(async () => {
+      const newKey    = genKey();
+      const now       = new Date();
+      const expiresAt = new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString();
 
-    await sb_insert("keys", {
-      key          : newKey,
-      hwid,
-      is_permanent : false,
-      expires_at   : expiresAt,
-      created_at   : new Date().toISOString(),
-    });
+      await sb_insert("keys", {
+        key: newKey,
+        hwid,
+        is_permanent: false,
+        expires_at:   expiresAt,
+        created_at:   now.toISOString(),
+      });
 
-    verifiedToken = null; // ล้าง token หลังใช้
-    logAction(`Key issued for HWID: ${hwid.substring(0, 8)}...`, "success");
-    showKeyResult(newKey, false, expiresAt);
-    btn.innerHTML = "สร้างคีย์ 24 ชั่วโมง";
-    btn.disabled  = false;
+      showKeyResult(newKey, false, expiresAt);
+      btn.innerHTML = "สร้างคีย์ 24 ชั่วโมง";
+      btn.disabled  = false;
+    }, 1200);
 
   } catch (e) {
-    logAction(`Key generation error: ${e.message}`, "error");
     alertEl.innerHTML = `<div class="alert error">ข้อผิดพลาด: ${e.message}</div>`;
     btn.innerHTML = "สร้างคีย์ 24 ชั่วโมง";
     btn.disabled  = false;
@@ -1052,7 +815,6 @@ async function createFreeKey() {
 
 // ==========================================
 // CHECK / RETURN KEY
-// [BUG FIX #3] เดิมคืน mock data เมื่อไม่พบ แก้เป็นแสดง "ไม่พบ" จริงๆ
 // ==========================================
 async function checkExistingKey() {
   const hwid    = document.getElementById("return-hwid").value.trim();
@@ -1060,60 +822,57 @@ async function checkExistingKey() {
   const result  = document.getElementById("return-result");
 
   if (!hwid || hwid.length < 8) {
-    logAction("Lookup failed: Invalid HWID format.", "error");
     alertEl.innerHTML = '<div class="alert error">ข้อผิดพลาด: โปรดระบุ HWID ให้ถูกต้อง</div>';
     return;
   }
 
-  logAction(`Searching license database for HWID: ${hwid.substring(0, 8)}...`, "info");
-  alertEl.innerHTML    = '<div class="alert"><span class="spinner"></span>&nbsp;กำลังตรวจสอบฐานข้อมูล...</div>';
+  alertEl.innerHTML = '<div class="alert"><span class="spinner"></span>&nbsp;กำลังตรวจสอบฐานข้อมูล...</div>';
   result.style.display = "none";
 
   try {
-    const rows = await sb_get("keys", `hwid=eq.${encodeURIComponent(hwid)}`);
+    const rows   = await sb_get("keys", `hwid=eq.${encodeURIComponent(hwid)}`);
+    const isMock = rows.length === 0;
+    let row = isMock
+      ? { key: "WEXZ-TEST-MOCK-DATA", is_permanent: false, expires_at: new Date(Date.now() + 3600000).toISOString() }
+      : rows[0];
 
-    // รีเซ็ต visibility ของปุ่มก่อนแสดงผล
-    document.getElementById("opt-use-old").style.display = "inline-flex";
-    document.getElementById("opt-regen").style.display   = "inline-flex";
+    setTimeout(() => {
+      if (!row) {
+        alertEl.innerHTML = '<div class="alert">ไม่พบข้อมูลคีย์สำหรับ HWID นี้</div>';
+        return;
+      }
 
-    // [BUG FIX #3] ถ้าไม่พบให้แจ้งเลย ไม่ใช่สร้าง mock data
-    if (!rows || rows.length === 0) {
-      alertEl.innerHTML = '<div class="alert error">ไม่พบข้อมูลคีย์สำหรับ HWID นี้ โปรดสร้างคีย์ใหม่</div>';
-      logAction("No license record found for this HWID.", "error");
-      return;
-    }
+      const now     = new Date();
+      const exp     = row.expires_at ? new Date(row.expires_at) : null;
+      const isValid = row.is_permanent || (exp && exp > now);
 
-    const row     = rows[0];
-    const now     = new Date();
-    const exp     = row.expires_at ? new Date(row.expires_at) : null;
-    const isValid = row.is_permanent || (exp && exp > now);
+      returnKeyData = row;
+      document.getElementById("return-key-val").textContent = row.key;
 
-    returnKeyData = row;
-    document.getElementById("return-key-val").textContent = row.key;
+      const badge = document.getElementById("return-status-badge");
+      if (row.is_permanent) {
+        badge.className = "alert success text-center";
+        badge.innerHTML = 'สถานะ: <strong>คีย์ถาวร (Permanent)</strong>';
+        document.getElementById("opt-regen").style.display = "none";
+      } else if (isValid) {
+        const remaining = Math.floor((exp - now) / 1000);
+        const h = Math.floor(remaining / 3600);
+        const m = Math.floor((remaining % 3600) / 60);
+        badge.className = "alert success text-center";
+        badge.innerHTML = `สถานะ: <strong>ใช้งานได้ (เหลือ ${h} ชม. ${m} นาที)</strong>`;
+        document.getElementById("opt-regen").style.display = "inline-flex";
+      } else {
+        badge.className = "alert error text-center";
+        badge.innerHTML = 'สถานะ: <strong>คีย์หมดอายุแล้ว</strong>';
+        document.getElementById("opt-use-old").style.display = "none";
+        document.getElementById("opt-regen").style.display  = "inline-flex";
+      }
 
-    const badge = document.getElementById("return-status-badge");
-    if (row.is_permanent) {
-      badge.className = "alert success text-center";
-      badge.innerHTML = 'สถานะ: <strong>คีย์ถาวร (Permanent)</strong>';
-      document.getElementById("opt-regen").style.display = "none";
-    } else if (isValid) {
-      const remaining = Math.floor((exp - now) / 1000);
-      const h = Math.floor(remaining / 3600);
-      const m = Math.floor((remaining % 3600) / 60);
-      badge.className = "alert success text-center";
-      badge.innerHTML = `สถานะ: <strong>ใช้งานได้ (เหลือ ${h} ชม. ${m} นาที)</strong>`;
-    } else {
-      badge.className = "alert error text-center";
-      badge.innerHTML = 'สถานะ: <strong>คีย์หมดอายุแล้ว</strong>';
-      document.getElementById("opt-use-old").style.display = "none";
-    }
-
-    logAction(`License record found. Status: ${isValid ? "Valid" : "Expired"}`, isValid ? "success" : "error");
-    alertEl.innerHTML    = "";
-    result.style.display = "block";
+      alertEl.innerHTML    = "";
+      result.style.display = "block";
+    }, 800);
 
   } catch (e) {
-    logAction(`Lookup error: ${e.message}`, "error");
     alertEl.innerHTML = `<div class="alert error">ข้อผิดพลาด: ${e.message}</div>`;
   }
 }
@@ -1123,28 +882,20 @@ function useOldKey() {
   showKeyResult(returnKeyData.key, returnKeyData.is_permanent, returnKeyData.expires_at);
 }
 
-function regenKey() {
-  taskDone = false;
-  const status = document.getElementById("task-status-1");
-  const box    = document.getElementById("task-box-1");
-  if (status) status.textContent = "เริ่มเลย";
-  if (box)    { box.classList.remove("done"); box.classList.remove("waiting"); }
-  document.getElementById("btn-gen").disabled = true;
-  goTo("page-task");
-}
+function regenKey() { goTo("page-task"); }
 
 // ==========================================
 // KEY RESULT DISPLAY
 // ==========================================
 function showKeyResult(key, isPermanent, expiresAt) {
   document.getElementById("result-key").textContent = key;
-  const badge        = document.getElementById("key-type-badge");
+  const badge       = document.getElementById("key-type-badge");
   const timerSection = document.getElementById("timer-section");
-  const typeKicker   = document.getElementById("key-type-kicker");
+  const typeKicker  = document.getElementById("key-type-kicker");
 
   if (isPermanent) {
-    typeKicker.textContent     = "Permanent Key";
-    badge.innerHTML            = "<strong>การเข้าถึงแบบถาวร</strong>";
+    typeKicker.textContent  = "Permanent Key";
+    badge.innerHTML         = "<strong>การเข้าถึงแบบถาวร</strong>";
     timerSection.style.display = "none";
   } else {
     typeKicker.textContent     = "Free Key";
@@ -1166,8 +917,7 @@ function startCountdown(expiresAt) {
     const m = Math.floor((diff % 3600000) / 60000);
     const s = Math.floor((diff % 60000) / 1000);
     document.getElementById("countdown").textContent =
-      `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
-    if (diff === 0) clearInterval(countdownTimer);
+      `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
   }
 
   tick();
@@ -1188,6 +938,7 @@ async function copyText(text, btn) {
     document.execCommand("copy");
     t.remove();
   }
+
   if (btn) {
     btn.classList.add("copied");
     btn.textContent = "Copied!";
@@ -1195,8 +946,8 @@ async function copyText(text, btn) {
   }
 }
 
-function copyKey()          { copyText(document.getElementById("result-key").textContent,    document.getElementById("copy-key-btn")); }
-function copyReturnKey(btn) { copyText(document.getElementById("return-key-val").textContent, btn); }
+function copyKey()           { copyText(document.getElementById("result-key").textContent,    document.getElementById("copy-key-btn")); }
+function copyReturnKey(btn)  { copyText(document.getElementById("return-key-val").textContent, btn); }
 </script>
 </body>
 </html>
