@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WexZ Hub - Verification</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; padding: 0; }
+
+:root {
+  --bg: #000000;
+  --surface: #0a0a0a;
+  --border: #1f1f1f;
+  --text-main: #ffffff;
+  --text-muted: #888888;
+  --accent: #ffffff;
+  --accent-invert: #000000;
+  --radius: 12px;
+  --font-sans: "IBM Plex Sans Thai", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.app-container {
+  width: 100%;
+  max-width: 420px;
+}
+
+/* Logo */
+.logo-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+.main-logo {
+  height: 110px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* Pages */
+.page { display: none; animation: fadeIn 0.4s ease forwards; }
+.page.active { display: block; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Typography */
+.title {
+  font-size: 26px;
+  font-weight: 500;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.5px;
+}
+.subtitle {
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--text-muted);
+  margin: 0 0 32px 0;
+  line-height: 1.5;
+}
+
+/* Buttons */
+.btn {
+  width: 100%;
+  padding: 14px 20px;
+  border-radius: var(--radius);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+.btn-primary {
+  background: var(--accent);
+  color: var(--accent-invert);
+}
+.btn-primary:hover:not(:disabled) {
+  background: #e6e6e6;
+  transform: translateY(-1px);
+}
+.btn-primary:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+}
+.btn-outline {
+  background: transparent;
+  color: var(--text-main);
+  border: 1px solid var(--border);
+}
+.btn-outline:hover { background: var(--surface); border-color: #333; }
+
+/* Task Card */
+.task-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 20px;
+  transition: all 0.3s;
+}
+.task-card.done  { border-color: #fff; }
+.task-card.verifying { animation: pulse-border 1.5s ease-in-out infinite; }
+@keyframes pulse-border {
+  0%,100% { border-color: #2a2a2a; }
+  50%      { border-color: #555; }
+}
+
+.opt-title { display: block; font-size: 15px; font-weight: 500; }
+.opt-desc  { display: block; font-size: 13px; font-weight: 300; color: var(--text-muted); margin-top: 2px; }
+
+.task-status {
+  font-size: 12px;
+  padding: 6px 12px;
+  background: #1f1f1f;
+  border-radius: 6px;
+  color: #fff;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+.task-card.done .task-status {
+  background: #fff;
+  color: #000;
+}
+
+/* Alert */
+.alert {
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 300;
+  margin-bottom: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.alert.success { color: #fff; border-color: rgba(255,255,255,0.25); }
+.alert.error   { color: #ff5555; border-color: rgba(255,85,85,0.25); background: rgba(255,0,0,0.04); }
+.alert.warn    { color: #ffcc55; border-color: rgba(255,200,0,0.25); background: rgba(255,180,0,0.04); }
+
+/* Spinner */
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  min-width: 14px;
+  border: 2px solid rgba(255,255,255,0.15);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Progress bar */
+.progress-wrap {
+  height: 2px;
+  background: #1a1a1a;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #555, #fff);
+  border-radius: 2px;
+  transition: width 1.4s cubic-bezier(0.4,0,0.2,1);
+}
+.progress-bar.go { width: 100%; }
+
+/* Expired / Error page styles */
+.icon-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  margin-bottom: 20px;
+}
+.icon-circle.warn  { background: rgba(255,200,0,0.1); border: 1px solid rgba(255,200,0,0.2); }
+.icon-circle.error { background: rgba(255,85,85,0.1); border: 1px solid rgba(255,85,85,0.2); }
+.icon-circle.success { background: #fff; }
+
+.text-center { text-align: center; }
+.mt-4  { margin-top: 16px; }
+.mt-6  { margin-top: 24px; }
+.mt-8  { margin-top: 32px; }
+.mb-4  { margin-bottom: 16px; }
+.mb-6  { margin-bottom: 24px; }
+
+/* Monitor */
+.monitor-card {
+  margin-top: 32px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+.monitor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.monitor-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.log-container {
+  max-height: 80px;
+  overflow-y: auto;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.6;
+}
+.log-entry { display: flex; gap: 10px; margin-bottom: 2px; animation: fadeIn .3s ease; }
+.log-time  { color: #444; min-width: 55px; }
+.log-msg   { color: #888; }
+.log-msg.success { color: #00ff88; }
+.log-msg.info    { color: #fff; }
+.log-msg.error   { color: #ff5555; }
+.log-container::-webkit-scrollbar { width: 3px; }
+.log-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+.conn-details { display: flex; gap: 16px; font-size: 10px; color: var(--text-muted); opacity: 0.6; }
+.conn-item    { display: flex; align-items: center; gap: 4px; }
+.conn-led     { width: 4px; height: 4px; border-radius: 50%; background: #444; }
+.conn-led.on  { background: #00ff88; box-shadow: 0 0 4px #00ff88; }
+</style>
+</head>
+<body>
+
+<div class="app-container">
+
+  <div class="logo-container">
+    <img src="1.jpg" alt="WEXZ" class="main-logo">
+  </div>
+
+  <!-- PAGE: VERIFYING (default) -->
+  <div class="page active" id="page-verify">
+    <h1 class="title">Complete Task</h1>
+    <p class="subtitle">ระบบกำลังยืนยันการเข้าถึง — กรุณารอสักครู่</p>
+
+    <div class="task-card verifying" id="task-card">
+      <div>
+        <span class="opt-title">Work.ink Support</span>
+        <span class="opt-desc">สนับสนุนผู้พัฒนา</span>
+      </div>
+      <div class="task-status" id="task-status">กำลังตรวจสอบ</div>
+    </div>
+
+    <div class="alert" id="verify-alert">
+      <span class="spinner"></span>
+      <span id="alert-text">กำลังยืนยันตัวตน กรุณารอสักครู่<span id="dots"></span></span>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-bar" id="prog-bar"></div>
+    </div>
+
+    <button class="btn btn-primary mt-6" id="btn-proceed" disabled onclick="proceedToMain()">
+      ดำเนินการต่อ
+    </button>
+  </div>
+
+  <!-- PAGE: EXPIRED -->
+  <div class="page" id="page-expired">
+    <div class="text-center mb-6">
+      <div class="icon-circle warn" style="margin:0 auto;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffcc55" stroke-width="2">
+          <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      </div>
+      <h1 class="title mt-4">Session หมดอายุ</h1>
+      <p class="subtitle" style="margin-bottom:0;">เซสชั่นนี้ใช้งานได้ 12 ชั่วโมง — กรุณาเริ่มใหม่จากเว็บหลัก</p>
+    </div>
+    <button class="btn btn-primary mt-8" onclick="goToMain()">
+      กลับไปที่ wexz-key.netlify.app
+    </button>
+  </div>
+
+  <!-- PAGE: NO TOKEN -->
+  <div class="page" id="page-notoken">
+    <div class="text-center mb-6">
+      <div class="icon-circle error" style="margin:0 auto;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff5555" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+        </svg>
+      </div>
+      <h1 class="title mt-4">ไม่พบ Session</h1>
+      <p class="subtitle" style="margin-bottom:0;">หน้านี้ใช้งานได้ผ่านลิงก์ work.ink เท่านั้น<br>กรุณาเริ่มจากเว็บหลักก่อน</p>
+    </div>
+    <button class="btn btn-primary mt-8" onclick="goToMain()">
+      ไปที่ wexz-key.netlify.app
+    </button>
+  </div>
+
+  <!-- Monitor -->
+  <div class="monitor-card">
+    <div class="monitor-header">
+      <div class="monitor-title">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        Live Activity Monitor
+      </div>
+      <div class="conn-details">
+        <div class="conn-item"><div class="conn-led on"></div> DB: Online</div>
+        <div class="conn-item"><div class="conn-led on"></div> API: SSL</div>
+      </div>
+    </div>
+    <div class="log-container" id="activity-log"></div>
+  </div>
+
+</div>
+
+<script>
+// =============================================
+// CONFIG — ต้องตรงกับ main site
+// =============================================
+const SUPABASE_URL  = "https://srnregbpupnzihgwuskk.supabase.co";
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNybnJlZ2JwdXBuemloZ3d1c2trIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwODMwMTgsImV4cCI6MjA5MzY1OTAxOH0.Z2e7Vh5heMKmyQdgQi3EFGEF1_ToYwkJwcmwoV9miG8";
+const TOKEN_KEY     = "wexz_verify_token";
+const SESSION_KEY   = "wexz_session_start";   // timestamp ที่ main site สร้าง session
+const MAIN_SITE     = "https://wexz-key.netlify.app/";
+const MAX_SESSION_MS = 12 * 60 * 60 * 1000;  // 12 ชั่วโมง
+
+const SB_HEADERS = {
+  "Content-Type" : "application/json",
+  "apikey"       : SUPABASE_ANON,
+  "Authorization": `Bearer ${SUPABASE_ANON}`,
+  "Prefer"       : "return=representation",
+};
+
+// =============================================
+// LOGGER
+// =============================================
+function log(msg, type = "info") {
+  const container = document.getElementById("activity-log");
+  if (!container) return;
+  const time  = new Date().toTimeString().split(" ")[0];
+  const entry = document.createElement("div");
+  entry.className = "log-entry";
+  entry.innerHTML = `<span class="log-time">[${time}]</span><span class="log-msg ${type}">${msg}</span>`;
+  container.prepend(entry);
+  if (container.children.length > 15) container.lastElementChild.remove();
+}
+
+// =============================================
+// NAVIGATION
+// =============================================
+function showPage(id) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+function goToMain() {
+  window.location.href = MAIN_SITE;
+}
+
+function proceedToMain() {
+  // ปิดแท็บนี้ → main site ตรวจ verified ผ่าน polling แล้ว
+  window.close();
+  // fallback: ถ้าปิดไม่ได้ (บาง browser) ให้ redirect
+  setTimeout(() => { window.location.href = MAIN_SITE; }, 300);
+}
+
+// =============================================
+// ANIMATED DOTS
+// =============================================
+let dotsCount = 0;
+const dotsEl  = document.getElementById("dots");
+if (dotsEl) {
+  setInterval(() => {
+    dotsCount = (dotsCount + 1) % 4;
+    dotsEl.textContent = ".".repeat(dotsCount);
+  }, 400);
+}
+
+// =============================================
+// MAIN BOOT
+// =============================================
+window.addEventListener("DOMContentLoaded", async () => {
+  log("Callback gateway initialized.", "success");
+
+  const token      = localStorage.getItem(TOKEN_KEY);
+  const sessionStart = localStorage.getItem(SESSION_KEY);
+
+  // ① ไม่มี token → ไม่ได้มาจาก main site
+  if (!token) {
+    log("No pending session found.", "error");
+    showPage("page-notoken");
+    return;
+  }
+
+  // ② ตรวจ 12 ชั่วโมง
+  if (sessionStart) {
+    const elapsed = Date.now() - parseInt(sessionStart, 10);
+    if (elapsed > MAX_SESSION_MS) {
+      log("Session expired (>12h). Redirecting user.", "error");
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(SESSION_KEY);
+      showPage("page-expired");
+      return;
+    }
+  }
+
+  log("Valid session token found. Verifying with database...", "info");
+
+  // ③ เริ่ม progress bar (cosmetic)
+  requestAnimationFrame(() => {
+    const bar = document.getElementById("prog-bar");
+    if (bar) requestAnimationFrame(() => bar.classList.add("go"));
+  });
+
+  // ④ ตรวจ + mark verified ใน Supabase
+  try {
+    const checkURL = `${SUPABASE_URL}/rest/v1/verify_tokens?token=eq.${encodeURIComponent(token)}&verified=eq.false&used=eq.false&limit=1`;
+    const res      = await fetch(checkURL, { method: "GET", headers: SB_HEADERS });
+    if (!res.ok) throw new Error(`DB error ${res.status}`);
+    const rows = await res.json();
+
+    if (!rows || rows.length === 0) {
+      // อาจ verified ไปแล้วจากแท็บอื่น (double open) — ถือว่า ok
+      log("Token already processed or not found.", "info");
+    } else if (new Date(rows[0].expires_at) < new Date()) {
+      log("Token expired.", "error");
+      localStorage.removeItem(TOKEN_KEY);
+      showPage("page-expired");
+      return;
+    } else {
+      // Mark verified=true
+      await fetch(
+        `${SUPABASE_URL}/rest/v1/verify_tokens?token=eq.${encodeURIComponent(token)}`,
+        { method: "PATCH", headers: SB_HEADERS, body: JSON.stringify({ verified: true }) }
+      );
+      log("Token marked verified. Session active.", "success");
+    }
+
+    // ⑤ ส่ง BroadcastChannel ให้ main tab (ถ้ายังเปิดอยู่)
+    try {
+      const ch = new BroadcastChannel("wexz_verify");
+      ch.postMessage({ type: "VERIFIED", token });
+      setTimeout(() => ch.close(), 1000);
+    } catch {}
+
+    localStorage.removeItem(TOKEN_KEY);
+
+    // ⑥ แสดง UI สำเร็จ
+    const card   = document.getElementById("task-card");
+    const status = document.getElementById("task-status");
+    const alert  = document.getElementById("verify-alert");
+    const btn    = document.getElementById("btn-proceed");
+
+    card.classList.remove("verifying");
+    card.classList.add("done");
+    status.textContent   = "สำเร็จ";
+    alert.className      = "alert success";
+    alert.innerHTML      = `
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00ff88" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      ยืนยันสำเร็จแล้ว — กดปุ่มด้านล่างเพื่อดำเนินการต่อ
+    `;
+    btn.disabled = false;
+    log("Verification complete. User may proceed.", "success");
+
+  } catch (e) {
+    log(`Verification error: ${e.message}`, "error");
+    const alert = document.getElementById("verify-alert");
+    alert.className = "alert error";
+    alert.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ff5555" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+      เกิดข้อผิดพลาด: ${e.message}
+    `;
+  }
+});
+</script>
+</body>
+</html>
