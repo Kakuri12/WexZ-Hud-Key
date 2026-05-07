@@ -46,7 +46,6 @@ body {
   position: relative;
 }
 
-/* Logo Integration */
 .logo-container {
   display: flex;
   justify-content: center;
@@ -59,7 +58,6 @@ body {
   object-fit: contain;
 }
 
-/* Page Transitions */
 .page {
   display: none;
   animation: fadeIn 0.4s ease forwards;
@@ -74,7 +72,6 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Typography */
 .title {
   font-size: 26px;
   font-weight: 500;
@@ -90,7 +87,6 @@ body {
   line-height: 1.5;
 }
 
-/* Buttons */
 .btn {
   width: 100%;
   padding: 14px 20px;
@@ -151,7 +147,6 @@ body {
   color: var(--text-main);
 }
 
-/* Menu List (Options Stack) */
 .option-row {
   display: flex;
   align-items: center;
@@ -207,7 +202,6 @@ body {
   color: var(--text-main);
 }
 
-/* Input Fields */
 .input-group {
   margin-bottom: 24px;
 }
@@ -243,7 +237,6 @@ body {
   color: #444;
 }
 
-/* Utilities */
 .w-full { width: 100%; }
 .mt-4 { margin-top: 16px; }
 .mt-6 { margin-top: 24px; }
@@ -257,7 +250,6 @@ body {
 .text-muted { color: var(--text-muted); }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-/* Dividers */
 .divider {
   display: flex;
   align-items: center;
@@ -277,7 +269,6 @@ body {
 .divider::before { margin-right: 16px; }
 .divider::after { margin-left: 16px; }
 
-/* Alerts */
 .alert {
   padding: 14px 16px;
   border-radius: var(--radius);
@@ -292,7 +283,6 @@ body {
 .alert.success { color: #fff; border-color: rgba(255,255,255,0.3); }
 .alert.error { color: #ff5555; border-color: rgba(255,85,85,0.2); background: rgba(255,0,0,0.05); }
 
-/* Key Display Box */
 .key-box {
   display: flex;
   align-items: center;
@@ -325,7 +315,6 @@ body {
 .btn-icon:hover { background: #e6e6e6; }
 .btn-icon.copied { background: #ffffff; color: #000; opacity: 0.8; }
 
-/* Feature List (Premium Page) */
 .feature-list {
   list-style: none;
   padding: 0;
@@ -346,7 +335,6 @@ body {
 .feature-list li:last-child { border-bottom: none; }
 .feature-list li svg { color: #fff; opacity: 0.7; }
 
-/* Interactive Task Card */
 .task-card {
   display: flex;
   justify-content: space-between;
@@ -377,14 +365,12 @@ body {
   color: #000;
 }
 
-/* Minimal Timer */
 .timer-minimal {
   padding: 24px 0;
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
 }
 
-/* Spinner Loader */
 .spinner {
   display: inline-block;
   width: 14px;
@@ -402,7 +388,6 @@ body {
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* Waiting pulse on task card */
 .task-card.waiting {
   border-color: #444;
   animation: pulse-border 2s ease-in-out infinite;
@@ -414,7 +399,34 @@ body {
   50%       { border-color: #666; }
 }
 
-/* Live Activity Monitor */
+/* ── Poll Progress Bar ── */
+.poll-bar-wrap {
+  height: 2px;
+  background: #1a1a1a;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.poll-bar {
+  height: 100%;
+  width: 0%;
+  background: #fff;
+  border-radius: 2px;
+  transition: width 3.8s linear;
+}
+
+.poll-bar.tick { width: 100%; }
+
+/* Countdown dots */
+.poll-dots span {
+  animation: blink 1.4s infinite;
+  opacity: 0;
+}
+.poll-dots span:nth-child(2) { animation-delay: 0.2s; }
+.poll-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes blink { 0%,80%,100%{opacity:0} 40%{opacity:1} }
+
 .monitor-card {
   margin-top: 32px;
   background: rgba(255, 255, 255, 0.02);
@@ -465,12 +477,10 @@ body {
 .log-msg.info { color: #fff; }
 .log-msg.error { color: #ff5555; }
 
-/* Scrollbar for log */
 .log-container::-webkit-scrollbar { width: 4px; }
 .log-container::-webkit-scrollbar-track { background: transparent; }
 .log-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
 
-/* Connection Details */
 .conn-details {
   display: flex;
   gap: 16px;
@@ -488,7 +498,6 @@ body {
 
 <div class="app-container">
   
-  <!-- WEXZ Minimal Logo -->
   <div class="logo-container">
     <img src="1.jpg" alt="WEXZ" class="main-logo">
   </div>
@@ -529,7 +538,7 @@ body {
 
   <!-- PAGE: TASK -->
   <div class="page" id="page-task">
-    <button class="btn-back" onclick="goTo('page-choose')">
+    <button class="btn-back" onclick="cancelTaskAndGoBack()">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
       กลับ
     </button>
@@ -695,6 +704,8 @@ const CONFIG = {
   SUPABASE_ANON : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNybnJlZ2JwdXBuemloZ3d1c2trIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwODMwMTgsImV4cCI6MjA5MzY1OTAxOH0.Z2e7Vh5heMKmyQdgQi3EFGEF1_ToYwkJwcmwoV9miG8",
   TASK_LINK     : "https://work.ink/2tB2/RSQ-0fe41fb1-32bb-4f93-8804-a6ddd8a37f16",
   TOKEN_KEY     : "wexz_verify_token",
+  POLL_INTERVAL : 4000,   // ตรวจ Supabase ทุก 4 วินาที
+  POLL_TIMEOUT  : 10 * 60 * 1000,  // หมดเวลาใน 10 นาที
 };
 
 const SB_HEADERS = {
@@ -733,6 +744,16 @@ function buildCallbackURL(token) {
 }
 
 // ==========================================
+// APP STATE
+// ==========================================
+let taskDone       = false;
+let verifiedToken  = null;
+let countdownTimer = null;
+let returnKeyData  = null;
+let pollTimer      = null;   // ← NEW: handle ของ setInterval สำหรับ polling
+let pollStartTime  = null;   // ← NEW: เวลาเริ่ม poll
+
+// ==========================================
 // BOOT — ตรวจสอบ callback จาก work.ink
 // ==========================================
 const verifyChannel = new BroadcastChannel("wexz_verify");
@@ -746,7 +767,6 @@ window.addEventListener("DOMContentLoaded", async () => {
     history.replaceState({}, "", window.location.pathname);
     const stored = localStorage.getItem(CONFIG.TOKEN_KEY);
 
-    // ตรวจสอบ localStorage ก่อน (ป้องกันคนพิมพ์ URL เอง)
     if (!stored || incoming !== stored) {
       verifyChannel.postMessage({ type: "FAILED" });
       localStorage.removeItem(CONFIG.TOKEN_KEY);
@@ -754,7 +774,6 @@ window.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    // ② ตรวจสอบกับ Supabase ว่า token นี้มีอยู่จริงและยังไม่ถูกใช้
     try {
       const rows = await (async () => {
         const url = `${CONFIG.SUPABASE_URL}/rest/v1/verify_tokens?token=eq.${encodeURIComponent(incoming)}&verified=eq.false&used=eq.false&limit=1`;
@@ -764,14 +783,12 @@ window.addEventListener("DOMContentLoaded", async () => {
       })();
 
       if (!rows || rows.length === 0 || new Date(rows[0].expires_at) < new Date()) {
-        // Token ไม่มีในDB หรือหมดอายุ
         verifyChannel.postMessage({ type: "FAILED" });
         localStorage.removeItem(CONFIG.TOKEN_KEY);
         setTimeout(() => window.close(), 400);
         return;
       }
 
-      // ③ Mark verified=true ใน Supabase
       const patchURL = `${CONFIG.SUPABASE_URL}/rest/v1/verify_tokens?token=eq.${encodeURIComponent(incoming)}`;
       await fetch(patchURL, {
         method : "PATCH",
@@ -779,7 +796,6 @@ window.addEventListener("DOMContentLoaded", async () => {
         body   : JSON.stringify({ verified: true }),
       });
 
-      // ④ ส่งสัญญาณสำเร็จไปแท็บหลักพร้อม token
       verifyChannel.postMessage({ type: "VERIFIED", token: incoming });
       localStorage.removeItem(CONFIG.TOKEN_KEY);
       setTimeout(() => window.close(), 400);
@@ -795,38 +811,100 @@ window.addEventListener("DOMContentLoaded", async () => {
   // ── กรณีปกติ: แท็บหลัก ──
   logAction("System initialized. Secure Gateway active.", "success");
 
-  // ฟัง BroadcastChannel จากแท็บ callback
+  // ฟัง BroadcastChannel จากแท็บ callback (fast path)
   verifyChannel.onmessage = (event) => {
     if (event.data.type === "VERIFIED") {
-      logAction("Gateway verification successful.", "success");
-      taskDone      = true;
-      verifiedToken = event.data.token; // เก็บ token สำหรับ server-side check ตอนสร้างคีย์
-
-      const box    = document.getElementById("task-box-1");
-      const status = document.getElementById("task-status-1");
-      if (box)    { box.classList.remove("waiting"); box.classList.add("done"); }
-      if (status) status.textContent = "สำเร็จ";
-      document.getElementById("btn-gen").disabled = false;
-
-      const alertBox = document.getElementById("task-alert");
-      alertBox.style.display = "block";
-      alertBox.className     = "alert success";
-      alertBox.textContent   = "ยืนยันสำเร็จ! สามารถดำเนินการต่อได้เลย";
+      handleVerifySuccess(event.data.token);
     } else if (event.data.type === "FAILED") {
-      logAction("Token mismatch or session expired. Verification failed.", "error");
-
-      const box    = document.getElementById("task-box-1");
-      const status = document.getElementById("task-status-1");
-      if (box)    { box.classList.remove("waiting"); }
-      if (status) status.textContent = "เริ่มเลย";
-
-      const alertBox = document.getElementById("task-alert");
-      alertBox.style.display = "block";
-      alertBox.className     = "alert error";
-      alertBox.textContent   = "ไม่สามารถยืนยันได้ โปรดทำภารกิจใหม่อีกครั้ง";
+      handleVerifyFail();
     }
   };
 });
+
+// ==========================================
+// ✅ NEW: Supabase Polling (fallback หลัก)
+// ==========================================
+function startPolling(token) {
+  stopPolling(); // clear ของเก่าก่อนเสมอ
+  pollStartTime = Date.now();
+  logAction("Polling verification status from DB...", "info");
+
+  pollTimer = setInterval(async () => {
+    // Timeout check
+    if (Date.now() - pollStartTime > CONFIG.POLL_TIMEOUT) {
+      stopPolling();
+      handleVerifyFail("หมดเวลา session (10 นาที) โปรดทำภารกิจใหม่");
+      return;
+    }
+
+    try {
+      const url = `${CONFIG.SUPABASE_URL}/rest/v1/verify_tokens?token=eq.${encodeURIComponent(token)}&verified=eq.true&used=eq.false&limit=1`;
+      const res = await fetch(url, { method: "GET", headers: SB_HEADERS });
+      if (!res.ok) return; // network blip — try again next tick
+
+      const rows = await res.json();
+      if (rows && rows.length > 0) {
+        // ตรวจว่ายังไม่หมดอายุ
+        if (new Date(rows[0].expires_at) >= new Date()) {
+          stopPolling();
+          handleVerifySuccess(token);
+        }
+      }
+    } catch {
+      // ไม่ทำอะไร รอรอบถัดไป
+    }
+  }, CONFIG.POLL_INTERVAL);
+}
+
+function stopPolling() {
+  if (pollTimer) {
+    clearInterval(pollTimer);
+    pollTimer = null;
+  }
+}
+
+// ==========================================
+// ✅ NEW: Centralized verify handlers
+// ==========================================
+function handleVerifySuccess(token) {
+  // กัน double-trigger (channel + poll ยิงพร้อมกัน)
+  if (taskDone) return;
+
+  logAction("Gateway verification successful.", "success");
+  taskDone      = true;
+  verifiedToken = token;
+  stopPolling();
+
+  const box    = document.getElementById("task-box-1");
+  const status = document.getElementById("task-status-1");
+  if (box)    { box.classList.remove("waiting"); box.classList.add("done"); }
+  if (status) status.textContent = "สำเร็จ";
+  document.getElementById("btn-gen").disabled = false;
+
+  const alertBox = document.getElementById("task-alert");
+  if (alertBox) {
+    alertBox.style.display = "block";
+    alertBox.className     = "alert success";
+    alertBox.textContent   = "ยืนยันสำเร็จ! สามารถดำเนินการต่อได้เลย";
+  }
+}
+
+function handleVerifyFail(msg = "ไม่สามารถยืนยันได้ โปรดทำภารกิจใหม่อีกครั้ง") {
+  logAction(`Token mismatch or session expired. Verification failed.`, "error");
+  stopPolling();
+
+  const box    = document.getElementById("task-box-1");
+  const status = document.getElementById("task-status-1");
+  if (box)    { box.classList.remove("waiting"); }
+  if (status) status.textContent = "เริ่มเลย";
+
+  const alertBox = document.getElementById("task-alert");
+  if (alertBox) {
+    alertBox.style.display = "block";
+    alertBox.className     = "alert error";
+    alertBox.textContent   = msg;
+  }
+}
 
 // ==========================================
 // REAL SUPABASE FUNCTIONS
@@ -867,13 +945,8 @@ async function sb_delete(table, filter) {
 }
 
 // ==========================================
-// APP STATE & NAVIGATION
+// NAVIGATION
 // ==========================================
-let taskDone       = false;
-let verifiedToken  = null;   // token ที่ผ่าน server-side แล้ว — ต้องใช้ตอนสร้างคีย์
-let countdownTimer = null;
-let returnKeyData  = null;
-
 function genKey() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   const seg = n => Array.from({ length: n }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
@@ -894,13 +967,26 @@ function goTo(pageId) {
   });
 }
 
+// ✅ NEW: หยุด poll เมื่อกดกลับ
+function cancelTaskAndGoBack() {
+  stopPolling();
+  // ถ้ายังไม่เสร็จ reset state
+  if (!taskDone) {
+    const box    = document.getElementById("task-box-1");
+    const status = document.getElementById("task-status-1");
+    if (box)    { box.classList.remove("waiting"); }
+    if (status) status.textContent = "เริ่มเลย";
+  }
+  goTo("page-choose");
+}
+
 function selectPlan(plan) {
   if (plan === "free")    goTo("page-task");
   if (plan === "premium") goTo("page-premium");
 }
 
 // ==========================================
-// TASK — เปิด work.ink พร้อม callback token
+// TASK — เปิด work.ink พร้อม callback + polling
 // ==========================================
 async function startTask() {
   if (taskDone) return;
@@ -909,7 +995,6 @@ async function startTask() {
   const status   = document.getElementById("task-status-1");
   const alertBox = document.getElementById("task-alert");
 
-  // แสดง loading ก่อน
   box.classList.add("waiting");
   status.textContent     = "กำลังโหลด...";
   alertBox.style.display = "block";
@@ -917,9 +1002,9 @@ async function startTask() {
   alertBox.innerHTML     = '<span class="spinner" style="border-color:rgba(255,255,255,.2);border-top-color:#fff;"></span>&nbsp; กำลังสร้าง session...';
 
   try {
-    // ① สร้าง token และบันทึกลง Supabase ก่อน — ไม่มีในDB = ไม่ผ่าน
+    // ① สร้าง token และบันทึก Supabase
     const token     = genToken();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // หมดอายุใน 10 นาที
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 
     await sb_insert("verify_tokens", {
       token,
@@ -929,17 +1014,31 @@ async function startTask() {
       used       : false,
     });
 
-    // ② เก็บ token ใน localStorage สำหรับ callback tab
+    // ② เก็บ token ใน localStorage
     localStorage.setItem(CONFIG.TOKEN_KEY, token);
     const callbackURL = buildCallbackURL(token);
 
     logAction("Verification session created. Opening gateway...", "info");
 
-    status.textContent  = "กำลังรอ...";
-    alertBox.innerHTML  = '<span class="spinner" style="border-color:rgba(255,255,255,.2);border-top-color:#fff;"></span>&nbsp; ทำตามขั้นตอนในแท็บใหม่จนเสร็จ — ระบบจะยืนยันอัตโนมัติ';
+    // ③ อัพเดต UI + แสดง progress bar
+    status.textContent = "กำลังรอ...";
+    alertBox.innerHTML = `
+      <span class="spinner" style="border-color:rgba(255,255,255,.2);border-top-color:#fff;"></span>
+      &nbsp; ทำตามขั้นตอนในแท็บใหม่จนเสร็จ — ระบบตรวจสอบอัตโนมัติ<span class="poll-dots"><span>.</span><span>.</span><span>.</span></span>
+      <div class="poll-bar-wrap"><div class="poll-bar" id="poll-bar"></div></div>
+    `;
 
-    // ③ เปิดแท็บใหม่ไป work.ink
+    // Animate progress bar (cosmetic)
+    requestAnimationFrame(() => {
+      const bar = document.getElementById("poll-bar");
+      if (bar) { requestAnimationFrame(() => bar.classList.add("tick")); }
+    });
+
+    // ④ เปิดแท็บ work.ink
     window.open(`${CONFIG.TASK_LINK}?r=${encodeURIComponent(callbackURL)}`, "_blank");
+
+    // ⑤ เริ่ม polling Supabase ทุก 4 วินาที (ไม่ต้องพึ่ง BroadcastChannel เพียงอย่างเดียว)
+    startPolling(token);
 
   } catch (e) {
     logAction(`Session creation failed: ${e.message}`, "error");
@@ -958,7 +1057,6 @@ function goToGenerate() {
 
 // ==========================================
 // CREATE FREE KEY
-// ต้องมี verifiedToken ที่ผ่าน server-side ก่อนเสมอ
 // ==========================================
 async function createFreeKey() {
   const hwid    = document.getElementById("hwid-input").value.trim();
@@ -971,7 +1069,6 @@ async function createFreeKey() {
     return;
   }
 
-  // ④ ตรวจสอบ verifiedToken อีกครั้งฝั่ง server ก่อนออกคีย์
   if (!verifiedToken) {
     logAction("Key generation blocked: No verified session.", "error");
     alertEl.innerHTML = '<div class="alert error">ข้อผิดพลาด: ไม่พบ session ที่ผ่านการยืนยัน โปรดทำภารกิจก่อน</div>';
@@ -984,7 +1081,6 @@ async function createFreeKey() {
   alertEl.innerHTML = "";
 
   try {
-    // ⑤ ดึง token จาก Supabase — ต้อง verified=true และ used=false
     logAction("Validating server-side verification token...", "info");
     const tokenRows = await sb_get(
       "verify_tokens",
@@ -995,13 +1091,11 @@ async function createFreeKey() {
       throw new Error("ไม่พบ session ที่ถูกต้อง โปรดทำภารกิจใหม่");
     }
 
-    // ตรวจสอบว่าไม่หมดอายุ
     const tokenRow = tokenRows[0];
     if (new Date(tokenRow.expires_at) < new Date()) {
       throw new Error("Session หมดอายุแล้ว โปรดทำภารกิจใหม่");
     }
 
-    // ⑥ Mark token เป็น used=true ทันที (ป้องกัน replay)
     await sb_update(
       "verify_tokens",
       `token=eq.${encodeURIComponent(verifiedToken)}`,
@@ -1009,7 +1103,6 @@ async function createFreeKey() {
     );
     logAction("Token consumed. Generating key...", "info");
 
-    // ⑦ ตรวจสอบคีย์เก่าของ HWID นี้
     const existing = await sb_get("keys", `hwid=eq.${encodeURIComponent(hwid)}`);
     if (existing && existing.length > 0) {
       const row = existing[0];
@@ -1024,7 +1117,6 @@ async function createFreeKey() {
       logAction("Expired key removed.", "info");
     }
 
-    // ⑧ สร้างคีย์ใหม่
     const newKey    = genKey();
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
@@ -1036,7 +1128,7 @@ async function createFreeKey() {
       created_at   : new Date().toISOString(),
     });
 
-    verifiedToken = null; // ล้าง token หลังใช้
+    verifiedToken = null;
     logAction(`Key issued for HWID: ${hwid.substring(0, 8)}...`, "success");
     showKeyResult(newKey, false, expiresAt);
     btn.innerHTML = "สร้างคีย์ 24 ชั่วโมง";
@@ -1052,7 +1144,6 @@ async function createFreeKey() {
 
 // ==========================================
 // CHECK / RETURN KEY
-// [BUG FIX #3] เดิมคืน mock data เมื่อไม่พบ แก้เป็นแสดง "ไม่พบ" จริงๆ
 // ==========================================
 async function checkExistingKey() {
   const hwid    = document.getElementById("return-hwid").value.trim();
@@ -1072,11 +1163,9 @@ async function checkExistingKey() {
   try {
     const rows = await sb_get("keys", `hwid=eq.${encodeURIComponent(hwid)}`);
 
-    // รีเซ็ต visibility ของปุ่มก่อนแสดงผล
     document.getElementById("opt-use-old").style.display = "inline-flex";
     document.getElementById("opt-regen").style.display   = "inline-flex";
 
-    // [BUG FIX #3] ถ้าไม่พบให้แจ้งเลย ไม่ใช่สร้าง mock data
     if (!rows || rows.length === 0) {
       alertEl.innerHTML = '<div class="alert error">ไม่พบข้อมูลคีย์สำหรับ HWID นี้ โปรดสร้างคีย์ใหม่</div>';
       logAction("No license record found for this HWID.", "error");
@@ -1125,6 +1214,8 @@ function useOldKey() {
 
 function regenKey() {
   taskDone = false;
+  verifiedToken = null;
+  stopPolling();
   const status = document.getElementById("task-status-1");
   const box    = document.getElementById("task-box-1");
   if (status) status.textContent = "เริ่มเลย";
